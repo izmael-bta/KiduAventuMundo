@@ -1,4 +1,4 @@
-package com.ismael.kiduavendumundo.kiduavendumundo
+package com.ismael.kiduaventumundo.kiduaventumundo
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost

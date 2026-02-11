@@ -2,15 +2,15 @@ package com.ismael.kiduaventumundo.kiduaventumundo.front.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun MenuScreen(
+    onGoEnglish: () -> Unit,
     onLogout: () -> Unit
 ) {
-    // Luego: traer de Firestore nickname + stars
     val nickname = "Isma"
     val stars = 0
 
@@ -21,11 +21,9 @@ fun MenuScreen(
         Text("⭐ $stars")
 
         Spacer(Modifier.height(16.dp))
-        Button(onClick = { /* Inglés */ }, modifier = Modifier.fillMaxWidth()) { Text("Inglés") }
-        Spacer(Modifier.height(10.dp))
-        Button(onClick = { /* Español */ }, modifier = Modifier.fillMaxWidth()) { Text("Español") }
-        Spacer(Modifier.height(10.dp))
-        Button(onClick = { /* Matemáticas */ }, modifier = Modifier.fillMaxWidth()) { Text("Matemáticas") }
+        Button(onClick = onGoEnglish, modifier = Modifier.fillMaxWidth()) {
+            Text("Inglés")
+        }
 
         Spacer(Modifier.height(20.dp))
         OutlinedButton(onClick = onLogout, modifier = Modifier.fillMaxWidth()) {

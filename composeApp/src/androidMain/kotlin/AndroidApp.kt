@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.ismael.kiduaventumundo.kiduaventumundo.front.screens.EnglishScreen
 import com.ismael.kiduaventumundo.kiduaventumundo.front.screens.LoginScreen
 import com.ismael.kiduaventumundo.kiduaventumundo.front.screens.MenuScreen
 import com.ismael.kiduaventumundo.kiduaventumundo.front.screens.RegisterScreen
@@ -14,6 +15,7 @@ object Routes {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val MENU = "menu"
+    const val ENGLISH = "english"
 }
 
 @Composable
@@ -63,12 +65,17 @@ fun AndroidApp() {
 
         composable(Routes.MENU) {
             MenuScreen(
+                onGoEnglish = { navController.navigate(Routes.ENGLISH) },
                 onLogout = {
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.MENU) { inclusive = true }
                     }
                 }
             )
+        }
+
+        composable(Routes.ENGLISH) {
+            EnglishScreen(onBack = { navController.popBackStack() })
         }
     }
 }

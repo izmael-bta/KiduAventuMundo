@@ -1,4 +1,4 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.front.components
+package com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable

@@ -13,12 +13,12 @@ import com.ismael.kiduaventumundo.kiduaventumundo.back.model.User
 import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel1Screen
 import com.ismael.kiduaventumundo.kiduaventumundo.front.models.DefaultAvatars
 import com.ismael.kiduaventumundo.kiduaventumundo.front.models.UserProfileUi
-import com.ismael.kiduaventumundo.kiduaventumundo.front.screens.EnglishMenuScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.screens.LoginScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.screens.MenuScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.screens.ProfileScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.screens.RegisterScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.screens.SplashScreen
+import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.EnglishMenuScreen
+import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.LoginScreen
+import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.MenuScreen
+import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.ProfileScreen
+import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.RegisterScreen
+import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.SplashScreen
 
 object Routes {
     const val SPLASH = "splash"

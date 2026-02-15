@@ -1,11 +1,11 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.front.screens
+package com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.components.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ismael.kiduaventumundo.kiduaventumundo.front.components.AvatarPicker
+import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.components.AvatarPicker
 import com.ismael.kiduaventumundo.kiduaventumundo.front.models.*
 
 @Composable

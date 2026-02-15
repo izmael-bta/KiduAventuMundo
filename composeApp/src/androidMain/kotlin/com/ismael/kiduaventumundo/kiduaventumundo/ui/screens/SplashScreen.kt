@@ -1,4 +1,4 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.front.screens
+package com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.components.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

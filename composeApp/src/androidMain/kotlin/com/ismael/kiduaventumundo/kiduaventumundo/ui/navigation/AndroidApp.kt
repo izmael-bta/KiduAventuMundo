@@ -11,6 +11,7 @@ import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
 import com.ismael.kiduaventumundo.kiduaventumundo.back.model.User
 import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel1Screen
+import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel2Screen
 import com.ismael.kiduaventumundo.kiduaventumundo.front.models.DefaultAvatars
 import com.ismael.kiduaventumundo.kiduaventumundo.front.models.UserProfileUi
 import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.EnglishMenuScreen
@@ -28,6 +29,7 @@ object Routes {
     const val PROFILE = "profile"
     const val ENGLISH = "english"
     const val ENGLISH_LEVEL_1 = "english_level_1"
+    const val ENGLISH_LEVEL_2 = "english_level_2"
 }
 
 @Composable
@@ -76,7 +78,7 @@ fun AndroidApp() {
                 avatars = DefaultAvatars,
                 onCreate = { profile ->
                     if (db.nicknameExists(profile.username.trim())) {
-                        return@RegisterScreen
+                        return@RegisterScreen "Ese nickname ya existe."
                     }
                     val newId = db.registerUser(
                         User(
@@ -87,12 +89,14 @@ fun AndroidApp() {
                             stars = 0
                         )
                     )
-                    if (newId == -1L) return@RegisterScreen
+                    if (newId == -1L) return@RegisterScreen "No se pudo crear la cuenta."
 
                     db.setSession(newId)
+                    EnglishManager.resetProgress()
                     navController.navigate(Routes.MENU) {
                         popUpTo(Routes.REGISTER) { inclusive = true }
                     }
+                    null
                 },
                 onGoLogin = { navController.popBackStack() }
             )
@@ -118,6 +122,7 @@ fun AndroidApp() {
                 onGoProfile = { navController.navigate(Routes.PROFILE) },
                 onLogout = {
                     db.clearSession()
+                    EnglishManager.resetProgress()
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.MENU) { inclusive = true }
                     }
@@ -165,8 +170,9 @@ fun AndroidApp() {
                 levels = levels,
                 onBack = { navController.popBackStack() },
                 onLevelClick = { level ->
-                    if (level == 1) {
-                        navController.navigate(Routes.ENGLISH_LEVEL_1)
+                    when (level) {
+                        1 -> navController.navigate(Routes.ENGLISH_LEVEL_1)
+                        2 -> navController.navigate(Routes.ENGLISH_LEVEL_2)
                     }
                 }
             )
@@ -179,6 +185,11 @@ fun AndroidApp() {
                 }
             )
         }
+        composable(Routes.ENGLISH_LEVEL_2) {
+            EnglishLevel2Screen(
+                onBack = { navController.popBackStack() },
+                onFinished = { navController.popBackStack() }
+            )
+        }
     }
 }
-

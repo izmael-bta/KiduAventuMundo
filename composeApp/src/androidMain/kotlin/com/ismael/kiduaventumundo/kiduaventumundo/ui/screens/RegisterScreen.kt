@@ -11,7 +11,7 @@ import com.ismael.kiduaventumundo.kiduaventumundo.front.models.*
 @Composable
 fun RegisterScreen(
     avatars: List<AvatarOption>,
-    onCreate: (UserProfileUi) -> Unit,
+    onCreate: (UserProfileUi) -> String?,
     onGoLogin: () -> Unit
 ) {
     var name by remember { mutableStateOf("") }
@@ -84,7 +84,7 @@ fun RegisterScreen(
 
                 error = null
 
-                onCreate(
+                error = onCreate(
                     UserProfileUi(
                         name = cleanName,
                         age = age,

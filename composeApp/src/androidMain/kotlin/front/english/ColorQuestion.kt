@@ -9,7 +9,7 @@ data class ColorOption(
 )
 
 data class ColorQuestion(
-    val promptEn: String,          // "Select: RED"
+    val promptEn: String,
     val correctId: String,
     val options: List<ColorOption>
 )

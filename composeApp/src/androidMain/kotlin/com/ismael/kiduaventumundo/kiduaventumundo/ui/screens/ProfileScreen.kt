@@ -13,6 +13,7 @@ fun ProfileScreen(
     avatars: List<AvatarOption>,
     profile: UserProfileUi,
     onSave: (UserProfileUi) -> Unit,
+    onLogout: () -> Unit,
     onBack: () -> Unit
 ) {
     var selectedAvatarId by remember {
@@ -30,7 +31,7 @@ fun ProfileScreen(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Perfil", style = MaterialTheme.typography.headlineSmall)
+            Text("Ajustes", style = MaterialTheme.typography.headlineSmall)
             TextButton(onClick = onBack) {
                 Text("Volver")
             }
@@ -55,6 +56,13 @@ fun ProfileScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Guardar avatar")
+        }
+
+        OutlinedButton(
+            onClick = onLogout,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Cerrar sesion")
         }
     }
 }

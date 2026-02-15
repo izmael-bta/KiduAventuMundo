@@ -8,19 +8,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.actions.EnglishManager
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
 
 @Composable
 fun MenuScreen(
     nickname: String,
     onGoEnglish: () -> Unit,
-    onGoProfile: () -> Unit,
-    onLogout: () -> Unit
+    onGoProfile: () -> Unit
 ) {
     val stars = EnglishManager.stars.value
 
@@ -37,12 +35,7 @@ fun MenuScreen(
 
         Spacer(Modifier.height(10.dp))
         Button(onClick = onGoProfile, modifier = Modifier.fillMaxWidth()) {
-            Text("Ver perfil")
-        }
-
-        Spacer(Modifier.height(20.dp))
-        OutlinedButton(onClick = onLogout, modifier = Modifier.fillMaxWidth()) {
-            Text("Cerrar sesion")
+            Text("Ajustes")
         }
     }
 }

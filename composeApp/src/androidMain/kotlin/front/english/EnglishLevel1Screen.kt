@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,7 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.actions.EnglishManager
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -41,11 +42,20 @@ fun EnglishLevel1Screen(
     onFinished: () -> Unit
 ) {
     val passStars = 13
-    val questions = remember { EnglishLevel1Data.questions().shuffled() }
+    val questions = remember { EnglishLevel1Data.questions() }
+    val totalActivities = questions.size
+    val startIndex = remember {
+        EnglishManager.consumeStartActivity(level = 1).coerceIn(0, questions.lastIndex)
+    }
 
-    var index by remember { mutableIntStateOf(0) }
-    var starsLevel by remember { mutableIntStateOf(0) }
+    var index by remember { mutableIntStateOf(startIndex) }
+    var starsLevel by remember { mutableIntStateOf(EnglishManager.getLevelStars(1, totalActivities)) }
     var mistakes by remember { mutableIntStateOf(0) }
+    val activityStars = remember {
+        mutableStateListOf<Int?>().apply {
+            addAll(EnglishManager.getActivityStars(level = 1, totalActivities = totalActivities))
+        }
+    }
 
     var feedback by remember { mutableStateOf<String?>(null) }
     var locked by remember { mutableStateOf(false) }
@@ -56,16 +66,16 @@ fun EnglishLevel1Screen(
 
     val current = questions[index]
 
-    fun earnedStarsForThisActivity(m: Int): Int = when (m) {
-        0 -> 3
-        1 -> 2
-        2 -> 1
+    fun earnedStarsForThisActivity(m: Int): Int = when {
+        m == 0 -> 3
+        m == 1 -> 2
+        m == 2 -> 1
         else -> 0
     }
 
     fun restartLevel() {
         index = 0
-        starsLevel = 0
+        starsLevel = activityStars.sumOf { it ?: 0 }
         mistakes = 0
         feedback = null
         locked = false
@@ -117,7 +127,14 @@ fun EnglishLevel1Screen(
                                             if (ok) {
                                                 locked = true
                                                 val earned = earnedStarsForThisActivity(mistakes)
-                                                starsLevel += earned
+                                                EnglishManager.recordActivityResult(
+                                                    level = 1,
+                                                    activityIndex = index,
+                                                    starsEarned = earned,
+                                                    totalActivities = totalActivities
+                                                )
+                                                activityStars[index] = maxOf(activityStars[index] ?: -1, earned)
+                                                starsLevel = activityStars.sumOf { it ?: 0 }
                                                 feedback = "+$earned *"
 
                                                 scope.launch {

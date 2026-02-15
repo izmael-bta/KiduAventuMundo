@@ -1,4 +1,7 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.ui.viewmodel
 
-class RegistrerUiState {
-}
+data class RegisterUiState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val isSuccess: Boolean = false
+)

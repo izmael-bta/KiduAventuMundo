@@ -4,7 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import com.ismael.kiduaventumundo.kiduaventumundo.back.model.User
+import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.model.User
 
 class AppDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -74,6 +74,11 @@ class AppDatabaseHelper(context: Context) :
         cursor.use { return if (it.moveToFirst()) it.getLong(0) else null }
     }
 
+    fun getUserByNickname(nickname: String): User? {
+        val userId = getUserIdByNickname(nickname) ?: return null
+        return getUserById(userId)
+    }
+
     fun getUserById(userId: Long): User? {
         val db = readableDatabase
         val cursor = db.rawQuery(
@@ -109,6 +114,24 @@ class AppDatabaseHelper(context: Context) :
             values,
             "$COL_ID = ?",
             arrayOf(userId.toString())
+        ) > 0
+    }
+
+    fun updateUser(user: User): Boolean {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COL_NAME, user.name.trim())
+            put(COL_AGE, user.age)
+            put(COL_NICKNAME, user.nickname.trim())
+            put(COL_AVATAR_ID, user.avatarId)
+            put(COL_STARS, user.stars)
+        }
+
+        return db.update(
+            TABLE_USERS,
+            values,
+            "$COL_ID = ?",
+            arrayOf(user.id.toString())
         ) > 0
     }
 

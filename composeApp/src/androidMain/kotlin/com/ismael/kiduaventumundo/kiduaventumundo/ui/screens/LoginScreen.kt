@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
-import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
 
 @Composable
 fun LoginScreen(
@@ -59,7 +58,6 @@ fun LoginScreen(
                 }
 
                 db.setSession(userId)
-                EnglishManager.resetProgress()
                 isLoading = false
                 onLoginSuccess()
             },

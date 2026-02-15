@@ -10,21 +10,19 @@ class AppDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
-        // Tabla de usuarios
         db.execSQL(
             """
             CREATE TABLE $TABLE_USERS (
                 $COL_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                $COL_EMAIL TEXT NOT NULL UNIQUE,
                 $COL_NAME TEXT NOT NULL,
                 $COL_AGE INTEGER NOT NULL,
                 $COL_NICKNAME TEXT NOT NULL UNIQUE,
-                $COL_PASSWORD TEXT NOT NULL
+                $COL_AVATAR_ID TEXT NOT NULL,
+                $COL_STARS INTEGER NOT NULL DEFAULT 0
             )
             """.trimIndent()
         )
 
-        // Tabla de sesión (solo 1 fila con id=1)
         db.execSQL(
             """
             CREATE TABLE $TABLE_SESSION (
@@ -58,39 +56,29 @@ class AppDatabaseHelper(context: Context) :
     fun registerUser(user: User): Long {
         val db = writableDatabase
         val values = ContentValues().apply {
-            put(COL_EMAIL, user.email.trim())
             put(COL_NAME, user.name.trim())
             put(COL_AGE, user.age)
             put(COL_NICKNAME, user.nickname.trim())
-            put(COL_PASSWORD, user.password) // (para integrador está ok; luego podemos hashear)
+            put(COL_AVATAR_ID, user.avatarId)
+            put(COL_STARS, user.stars)
         }
         return db.insert(TABLE_USERS, null, values)
     }
 
-    /**
-     * Devuelve el userId si las credenciales son correctas, o null si no coinciden.
-     */
-    fun getUserIdByCredentials(nickname: String, password: String): Long? {
+    fun getUserIdByNickname(nickname: String): Long? {
         val db = readableDatabase
         val cursor = db.rawQuery(
-            """
-            SELECT $COL_ID 
-            FROM $TABLE_USERS 
-            WHERE $COL_NICKNAME = ? AND $COL_PASSWORD = ?
-            LIMIT 1
-            """.trimIndent(),
-            arrayOf(nickname.trim(), password)
+            "SELECT $COL_ID FROM $TABLE_USERS WHERE $COL_NICKNAME = ? LIMIT 1",
+            arrayOf(nickname.trim())
         )
-        cursor.use {
-            return if (it.moveToFirst()) it.getLong(0) else null
-        }
+        cursor.use { return if (it.moveToFirst()) it.getLong(0) else null }
     }
 
     fun getUserById(userId: Long): User? {
         val db = readableDatabase
         val cursor = db.rawQuery(
             """
-            SELECT $COL_ID, $COL_EMAIL, $COL_NAME, $COL_AGE, $COL_NICKNAME, $COL_PASSWORD
+            SELECT $COL_ID, $COL_NAME, $COL_AGE, $COL_NICKNAME, $COL_AVATAR_ID, $COL_STARS
             FROM $TABLE_USERS
             WHERE $COL_ID = ?
             LIMIT 1
@@ -100,23 +88,28 @@ class AppDatabaseHelper(context: Context) :
 
         cursor.use {
             if (!it.moveToFirst()) return null
-
-            val id = it.getLong(0)
-            val email = it.getString(1)
-            val name = it.getString(2)
-            val age = it.getInt(3)
-            val nickname = it.getString(4)
-            val password = it.getString(5)
-
             return User(
-                id = id,
-                email = email,
-                name = name,
-                age = age,
-                nickname = nickname,
-                password = password
+                id = it.getLong(0),
+                name = it.getString(1),
+                age = it.getInt(2),
+                nickname = it.getString(3),
+                avatarId = it.getString(4),
+                stars = it.getInt(5)
             )
         }
+    }
+
+    fun updateUserAvatar(userId: Long, avatarId: String): Boolean {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COL_AVATAR_ID, avatarId)
+        }
+        return db.update(
+            TABLE_USERS,
+            values,
+            "$COL_ID = ?",
+            arrayOf(userId.toString())
+        ) > 0
     }
 
     // -------------------------
@@ -129,34 +122,16 @@ class AppDatabaseHelper(context: Context) :
             put(COL_SESSION_ID, 1)
             put(COL_SESSION_USER_ID, userId)
         }
-
-        // Reemplaza si ya existía (id=1)
-        db.insertWithOnConflict(
-            TABLE_SESSION,
-            null,
-            values,
-            SQLiteDatabase.CONFLICT_REPLACE
-        )
+        db.insertWithOnConflict(TABLE_SESSION, null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
-    /**
-     * Devuelve el userId logueado si existe sesión, o null si no hay.
-     */
     fun getSessionUserId(): Long? {
         val db = readableDatabase
         val cursor = db.rawQuery(
-            """
-            SELECT $COL_SESSION_USER_ID
-            FROM $TABLE_SESSION
-            WHERE $COL_SESSION_ID = 1
-            LIMIT 1
-            """.trimIndent(),
+            "SELECT $COL_SESSION_USER_ID FROM $TABLE_SESSION WHERE $COL_SESSION_ID = 1 LIMIT 1",
             null
         )
-
-        cursor.use {
-            return if (it.moveToFirst() && !it.isNull(0)) it.getLong(0) else null
-        }
+        cursor.use { return if (it.moveToFirst() && !it.isNull(0)) it.getLong(0) else null }
     }
 
     fun clearSession() {
@@ -166,18 +141,16 @@ class AppDatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "kidu_aventumundo.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 2 // sube versión por cambio de esquema
 
-        // USERS
         private const val TABLE_USERS = "users"
         private const val COL_ID = "id"
-        private const val COL_EMAIL = "email"
         private const val COL_NAME = "name"
         private const val COL_AGE = "age"
         private const val COL_NICKNAME = "nickname"
-        private const val COL_PASSWORD = "password"
+        private const val COL_AVATAR_ID = "avatar_id"
+        private const val COL_STARS = "stars"
 
-        // SESSION
         private const val TABLE_SESSION = "session"
         private const val COL_SESSION_ID = "id"
         private const val COL_SESSION_USER_ID = "user_id"

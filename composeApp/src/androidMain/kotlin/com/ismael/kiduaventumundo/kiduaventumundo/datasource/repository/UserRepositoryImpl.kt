@@ -1,4 +1,4 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.datasource.repository
+package com.ismael.kiduaventumundo.kiduaventumundo.datasource.repository
 
 import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
 import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.model.User

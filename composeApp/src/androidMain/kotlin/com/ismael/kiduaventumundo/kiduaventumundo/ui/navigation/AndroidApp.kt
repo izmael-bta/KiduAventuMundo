@@ -1,7 +1,7 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.ui.navigation
 
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
@@ -9,32 +9,21 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishActivitiesScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel1Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel1Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel2Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel2Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel3Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel3Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel4Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel4Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel5Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel5Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel6Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel6Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel7Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel7Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel8Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel8Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.models.DefaultAvatars
-import com.ismael.kiduaventumundo.kiduaventumundo.front.models.UserProfileUi
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.model.User
 import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.EnglishMenuScreen
 import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.LoginScreen
 import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.MenuScreen
 import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.ProfileScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.RegisterScreen
+import com.ismael.kiduaventumundo.kiduaventumundo.datasource.repository.UserRepositoryImpl
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.operations.RegistrarUsuario
+import com.ismael.kiduaventumundo.kiduaventumundo.front.english.*
+import com.ismael.kiduaventumundo.kiduaventumundo.front.models.DefaultAvatars
+import com.ismael.kiduaventumundo.kiduaventumundo.front.models.UserProfileUi
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.RegisterScreen
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.SplashScreen
+
+
+
+
 
 @Composable
 fun AndroidApp() {
@@ -49,6 +38,7 @@ fun AndroidApp() {
 
         // ---------------- SPLASH ----------------
         composable(Routes.SPLASH) {
+
             SplashScreen(
                 hasSession = db.getSessionUserId() != null,
                 onGoLogin = {
@@ -64,6 +54,7 @@ fun AndroidApp() {
             )
         }
 
+
         // ---------------- LOGIN ----------------
         composable(Routes.LOGIN) {
             LoginScreen(
@@ -78,31 +69,21 @@ fun AndroidApp() {
 
         // ---------------- REGISTER ----------------
         composable(Routes.REGISTER) {
-            RegisterScreen(
-                avatars = DefaultAvatars,
-                onCreate = { profile ->
-                    if (db.nicknameExists(profile.username.trim())) {
-                        return@RegisterScreen
-                    }
-                    val newId = db.registerUser(
-                        User(
-                            name = profile.name.trim(),
-                            age = profile.age,
-                            nickname = profile.username.trim(),
-                            avatarId = "avatar_${profile.avatarId}",
-                            stars = 0
-                        )
-                    )
-                    if (newId == -1L) return@RegisterScreen
 
-                    db.setSession(newId)
+            val repository = UserRepositoryImpl(db)
+            val registrarUsuario = RegistrarUsuario(repository)
+
+            RegisterScreen(
+                registrarUsuario = registrarUsuario,
+                onRegisterSuccess = {
                     navController.navigate(Routes.MENU) {
                         popUpTo(Routes.REGISTER) { inclusive = true }
                     }
-                },
-                onGoLogin = { navController.popBackStack() }
+                }
             )
         }
+
+
 
         // ---------------- MENU ----------------
         composable(Routes.MENU) {
@@ -116,6 +97,8 @@ fun AndroidApp() {
                     }
                 }
                 return@composable
+                println("SESSION ID EN MENU: ${db.getSessionUserId()}")
+
             }
 
             MenuScreen(

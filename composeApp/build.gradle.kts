@@ -31,6 +31,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
 
             implementation("androidx.navigation:navigation-compose:2.8.0")
+
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -41,6 +42,7 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(compose.materialIconsExtended)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -77,9 +79,14 @@ android {
 
 dependencies {
     debugImplementation(libs.compose.uiTooling)
+
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("io.coil-kt:coil-gif:2.5.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+
+
+
 }
 
 

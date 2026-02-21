@@ -1,10 +1,19 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
 
+// ================= ANDROID SDK =================
 import android.os.Build
+
+// ================= COMPOSE - FOUNDATION =================
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+
+// ================= COMPOSE - MATERIAL =================
 import androidx.compose.material3.*
+
+// ================= COMPOSE - RUNTIME =================
 import androidx.compose.runtime.*
+
+// ================= COMPOSE - UI CORE =================
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -12,10 +21,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+// ================= LIBRERÍAS EXTERNAS =================
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
+
+// ================= PROYECTO =================
 import com.ismael.kiduaventumundo.kiduaventumundo.R
 import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
 
@@ -44,7 +57,7 @@ fun LoginScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // 🔹 Fondo
+        //  Fondo
         AsyncImage(
             model = R.drawable.fondo_registro,
             contentDescription = null,
@@ -52,7 +65,7 @@ fun LoginScreen(
             contentScale = ContentScale.Crop
         )
 
-        // 🔹 Búho animado
+        //  Búho animado
         AsyncImage(
             model = R.drawable.hello,
             imageLoader = imageLoader,
@@ -63,7 +76,7 @@ fun LoginScreen(
                 .padding(top = 50.dp)
         )
 
-        // 🔹 Card
+        //  Card
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -141,7 +154,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // 🔥 AQUÍ está tu mensaje original
+                //  MENSAJE
                 TextButton(
                     onClick = onGoRegister,
                     enabled = !isLoading

@@ -1,12 +1,13 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.ui.viewmodel
 
-import androidx.compose.runtime.getValue
+import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.ismael.kiduaventumundo.kiduaventumundo.R
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.model.Avatar
 
-class ProfileViewModel {
+class ProfileViewModel : ViewModel() {
 
     val avatars = listOf(
         Avatar(1, R.drawable.avatar_gato),
@@ -16,6 +17,9 @@ class ProfileViewModel {
     )
 
     var selectedAvatar by mutableStateOf(avatars.first())
+        private set
 
-
+    fun setAvatar(avatar: Avatar) {
+        selectedAvatar = avatar
+    }
 }

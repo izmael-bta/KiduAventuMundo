@@ -1,30 +1,58 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.ui.navigation
 
+// ============================
+// Compose Core
+// ============================
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+
+// ============================
+// Navigation
+// ============================
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+
+// ============================
+// ViewModel
+// ============================
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.viewmodel.ProfileViewModel
+
+// ============================
+// Database
+// ============================
 import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
+
+// ============================
+// Logic
+// ============================
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
 import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.EnglishMenuScreen
 import com.ismael.kiduaventumundo.kiduaventumundo.datasource.repository.UserRepositoryImpl
 import com.ismael.kiduaventumundo.kiduaventumundo.domain.operations.RegistrarUsuario
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.*
+
+// ============================
+// Screens
+// ============================
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.*
-import com.ismael.kiduaventumundo.kiduaventumundo.ui.viewmodel.ProfileViewModel
+import com.ismael.kiduaventumundo.kiduaventumundo.front.english.*
+
+// ============================
+// Models
+// ============================
 import front.models.UserProfileUi
-
-
-
 @Composable
 fun AndroidApp() {
 
     val context = LocalContext.current
     val db = remember { AppDatabaseHelper(context) }
     val navController = rememberNavController()
+
+    //  VIEWMODEL COMPARTIDO ENTRE MENU Y PROFILE
+    val profileViewModel: ProfileViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -93,6 +121,7 @@ fun AndroidApp() {
 
             MenuScreen(
                 nickname = sessionUser.nickname,
+                profileViewModel = profileViewModel,
                 onGoEnglish = { navController.navigate(Routes.ENGLISH) },
                 onGoProfile = { navController.navigate(Routes.PROFILE) }
             )
@@ -113,16 +142,18 @@ fun AndroidApp() {
                 return@composable
             }
 
-            val viewModel = ProfileViewModel()
+            // 🔥 Sincronizar avatar guardado
+            LaunchedEffect(Unit) {
+                val savedAvatarId = sessionUser.avatarId
+                    .filter { it.isDigit() }
+                    .toIntOrNull()
 
-            // 🔥 Sincronizar avatar guardado con ViewModel
-            val savedAvatarId = sessionUser.avatarId
-                .filter { it.isDigit() }
-                .toIntOrNull()
-
-            savedAvatarId?.let { id ->
-                viewModel.avatars.find { it.id == id }?.let { avatar ->
-                    viewModel.selectedAvatar = avatar
+                savedAvatarId?.let { id ->
+                    profileViewModel.avatars
+                        .find { it.id == id }
+                        ?.let { avatar ->
+                            profileViewModel.setAvatar(avatar)
+                        }
                 }
             }
 
@@ -135,15 +166,15 @@ fun AndroidApp() {
                         .filter { it.isDigit() }
                         .toIntOrNull() ?: 1
                 ),
-                avatars = viewModel.avatars,
-                selectedAvatar = viewModel.selectedAvatar,
+                avatars = profileViewModel.avatars,
+                selectedAvatar = profileViewModel.selectedAvatar,
                 onAvatarSelected = { avatar ->
-                    viewModel.selectedAvatar = avatar
+                    profileViewModel.setAvatar(avatar)
                 },
                 onSaveAvatar = {
                     db.updateUserAvatar(
                         userId = sessionUser.id,
-                        avatarId = "avatar_${viewModel.selectedAvatar.id}"
+                        avatarId = "avatar_${profileViewModel.selectedAvatar.id}"
                     )
                     navController.popBackStack()
                 },

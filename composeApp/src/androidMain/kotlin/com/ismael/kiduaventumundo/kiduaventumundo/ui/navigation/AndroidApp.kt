@@ -10,23 +10,18 @@ import androidx.navigation.compose.rememberNavController
 import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
 import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.EnglishMenuScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.LoginScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.MenuScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.ProfileScreen
 import com.ismael.kiduaventumundo.kiduaventumundo.datasource.repository.UserRepositoryImpl
 import com.ismael.kiduaventumundo.kiduaventumundo.domain.operations.RegistrarUsuario
 import com.ismael.kiduaventumundo.kiduaventumundo.front.english.*
-import com.ismael.kiduaventumundo.kiduaventumundo.front.models.DefaultAvatars
-import com.ismael.kiduaventumundo.kiduaventumundo.front.models.UserProfileUi
-import com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.RegisterScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.SplashScreen
-
-
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.*
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.viewmodel.ProfileViewModel
+import front.models.UserProfileUi
 
 
 
 @Composable
 fun AndroidApp() {
+
     val context = LocalContext.current
     val db = remember { AppDatabaseHelper(context) }
     val navController = rememberNavController()
@@ -38,7 +33,6 @@ fun AndroidApp() {
 
         // ---------------- SPLASH ----------------
         composable(Routes.SPLASH) {
-
             SplashScreen(
                 hasSession = db.getSessionUserId() != null,
                 onGoLogin = {
@@ -53,7 +47,6 @@ fun AndroidApp() {
                 }
             )
         }
-
 
         // ---------------- LOGIN ----------------
         composable(Routes.LOGIN) {
@@ -83,10 +76,9 @@ fun AndroidApp() {
             )
         }
 
-
-
         // ---------------- MENU ----------------
         composable(Routes.MENU) {
+
             val sessionUserId = db.getSessionUserId()
             val sessionUser = sessionUserId?.let { db.getUserById(it) }
 
@@ -97,8 +89,6 @@ fun AndroidApp() {
                     }
                 }
                 return@composable
-                println("SESSION ID EN MENU: ${db.getSessionUserId()}")
-
             }
 
             MenuScreen(
@@ -108,7 +98,9 @@ fun AndroidApp() {
             )
         }
 
+        // ---------------- PROFILE ----------------
         composable(Routes.PROFILE) {
+
             val sessionUserId = db.getSessionUserId()
             val sessionUser = sessionUserId?.let { db.getUserById(it) }
 
@@ -121,45 +113,74 @@ fun AndroidApp() {
                 return@composable
             }
 
+            val viewModel = ProfileViewModel()
+
+            // 🔥 Sincronizar avatar guardado con ViewModel
+            val savedAvatarId = sessionUser.avatarId
+                .filter { it.isDigit() }
+                .toIntOrNull()
+
+            savedAvatarId?.let { id ->
+                viewModel.avatars.find { it.id == id }?.let { avatar ->
+                    viewModel.selectedAvatar = avatar
+                }
+            }
+
             ProfileScreen(
-                avatars = DefaultAvatars,
                 profile = UserProfileUi(
                     name = sessionUser.name,
                     age = sessionUser.age,
                     username = sessionUser.nickname,
-                    avatarId = sessionUser.avatarId.filter { it.isDigit() }.toIntOrNull() ?: 1
+                    avatarId = sessionUser.avatarId
+                        .filter { it.isDigit() }
+                        .toIntOrNull() ?: 1
                 ),
-                onSave = { updatedProfile ->
+                avatars = viewModel.avatars,
+                selectedAvatar = viewModel.selectedAvatar,
+                onAvatarSelected = { avatar ->
+                    viewModel.selectedAvatar = avatar
+                },
+                onSaveAvatar = {
                     db.updateUserAvatar(
                         userId = sessionUser.id,
-                        avatarId = "avatar_${updatedProfile.avatarId}"
+                        avatarId = "avatar_${viewModel.selectedAvatar.id}"
                     )
                     navController.popBackStack()
                 },
                 onLogout = {
                     db.clearSession()
                     navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.MENU) { inclusive = true }
-                        popUpTo(Routes.PROFILE) { inclusive = true }
+                        popUpTo(0)
                     }
-                },
-                onBack = { navController.popBackStack() },
+                }
             )
         }
 
         // ---------------- ENGLISH LEVEL MENU ----------------
         composable(Routes.ENGLISH) {
+
             val levels = EnglishManager.getLevels()
 
             EnglishMenuScreen(
                 levels = levels,
                 onBack = { navController.popBackStack() },
-                onLevelClick = { level -> navController.navigate(Routes.englishActivities(level)) }
+                onLevelClick = { level ->
+                    navController.navigate(Routes.englishActivities(level))
+                }
             )
         }
+
+        // ---------------- ENGLISH ACTIVITIES ----------------
         composable(Routes.ENGLISH_ACTIVITIES) { backStackEntry ->
-            val level = backStackEntry.arguments?.getString("level")?.toIntOrNull() ?: 1
-            val levelTitle = EnglishManager.getLevels().firstOrNull { it.level == level }?.title ?: "Nivel $level"
+
+            val level = backStackEntry.arguments
+                ?.getString("level")
+                ?.toIntOrNull() ?: 1
+
+            val levelTitle = EnglishManager.getLevels()
+                .firstOrNull { it.level == level }
+                ?.title ?: "Nivel $level"
+
             val totalActivities = when (level) {
                 1 -> EnglishLevel1Data.questions().size
                 2 -> EnglishLevel2Data.questions().size
@@ -192,52 +213,57 @@ fun AndroidApp() {
                 }
             )
         }
+
+        // ---------------- LEVEL SCREENS ----------------
         composable(Routes.ENGLISH_LEVEL_1) {
             EnglishLevel1Screen(
                 onBack = { navController.popBackStack() },
-                onFinished = {
-                    navController.popBackStack()
-                }
+                onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_2) {
             EnglishLevel2Screen(
                 onBack = { navController.popBackStack() },
-                onFinished = {
-                    navController.popBackStack()
-                }
+                onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_3) {
             EnglishLevel3Screen(
                 onBack = { navController.popBackStack() },
                 onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_4) {
             EnglishLevel4Screen(
                 onBack = { navController.popBackStack() },
                 onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_5) {
             EnglishLevel5Screen(
                 onBack = { navController.popBackStack() },
                 onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_6) {
             EnglishLevel6Screen(
                 onBack = { navController.popBackStack() },
                 onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_7) {
             EnglishLevel7Screen(
                 onBack = { navController.popBackStack() },
                 onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_8) {
             EnglishLevel8Screen(
                 onBack = { navController.popBackStack() },
@@ -246,4 +272,3 @@ fun AndroidApp() {
         }
     }
 }
-

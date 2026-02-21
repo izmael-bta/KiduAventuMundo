@@ -1,4 +1,4 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.front.models
+/*package com.ismael.kiduaventumundo.kiduaventumundo.front.models
 
 val DefaultAvatars = listOf(
     AvatarOption(1, "Búho"),
@@ -10,3 +10,4 @@ val DefaultAvatars = listOf(
     AvatarOption(7, "Panda"),
     AvatarOption(8, "Dino")
 )
+*/

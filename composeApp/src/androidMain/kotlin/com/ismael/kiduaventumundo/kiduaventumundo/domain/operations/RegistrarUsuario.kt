@@ -2,7 +2,7 @@ package com.ismael.kiduaventumundo.kiduaventumundo.domain.operations
 
 import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.model.User
 import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.userRepository
-import com.ismael.kiduaventumundo.kiduaventumundo.front.models.UserProfileUi
+import front.models.UserProfileUi
 import com.ismael.kiduaventumundo.ui.viewmodel.RegisterResult
 
 class RegistrarUsuario(

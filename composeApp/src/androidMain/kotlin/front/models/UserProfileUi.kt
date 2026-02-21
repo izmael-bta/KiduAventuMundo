@@ -1,4 +1,4 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.front.models
+package front.models
 
 data class UserProfileUi(
     val name: String = "",

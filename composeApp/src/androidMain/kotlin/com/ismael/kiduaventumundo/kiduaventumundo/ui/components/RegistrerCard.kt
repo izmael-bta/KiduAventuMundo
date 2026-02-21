@@ -13,7 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ismael.kiduaventumundo.kiduaventumundo.front.models.UserProfileUi
+import front.models.UserProfileUi
 
 @Composable
 fun RegisterCard(

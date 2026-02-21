@@ -1,18 +1,18 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
+package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.AnimatedCircle
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.BackGroundMenu
+
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.Stars
+
 
 @Composable
 fun MenuScreen(
@@ -20,22 +20,66 @@ fun MenuScreen(
     onGoEnglish: () -> Unit,
     onGoProfile: () -> Unit
 ) {
-    val stars = EnglishManager.stars.value
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Menu", style = MaterialTheme.typography.headlineSmall)
-        Spacer(Modifier.height(8.dp))
-        Text("Hola, $nickname")
-        Text("⭐ $stars")
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
 
-        Spacer(Modifier.height(16.dp))
-        Button(onClick = onGoEnglish, modifier = Modifier.fillMaxWidth()) {
-            Text("Ingles")
-        }
+        //  Fondo
+        BackGroundMenu()
 
-        Spacer(Modifier.height(10.dp))
-        Button(onClick = onGoProfile, modifier = Modifier.fillMaxWidth()) {
-            Text("Ajustes")
+        // Circulos Animados
+        AnimatedCircle()
+
+        //  Estrellas
+        Stars()
+
+        //  Contenido centrado
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Text(
+                text = "Hola, $nickname ",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "⭐ ${EnglishManager.stars.value}",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(50.dp))
+
+            Button(
+                onClick = onGoEnglish,
+                modifier = Modifier
+                    .width(240.dp)
+                    .height(55.dp),
+                shape = MaterialTheme.shapes.large
+            ) {
+                Text("Inglés")
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Button(
+                onClick = onGoProfile,
+                modifier = Modifier
+                    .width(240.dp)
+                    .height(55.dp),
+                shape = MaterialTheme.shapes.large
+            ) {
+                Text("Ajustes")
+            }
         }
     }
 }

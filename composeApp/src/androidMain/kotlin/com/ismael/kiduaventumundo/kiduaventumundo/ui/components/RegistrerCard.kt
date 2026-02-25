@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -11,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import front.models.UserProfileUi
@@ -18,12 +20,14 @@ import front.models.UserProfileUi
 @Composable
 fun RegisterCard(
     modifier: Modifier = Modifier,
+    errorMessage: String? = null,
     onRegister: (UserProfileUi) -> Unit
 ) {
 
     var name by remember { mutableStateOf("") }
     var nickname by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -65,7 +69,25 @@ fun RegisterCard(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Contraseña") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
+
         Spacer(Modifier.height(20.dp))
+
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error
+            )
+            Spacer(Modifier.height(12.dp))
+        }
 
         Button(
             onClick = {
@@ -73,7 +95,8 @@ fun RegisterCard(
                     name = name,
                     username = nickname,
                     age = age.toIntOrNull() ?: 0,
-                    avatarId = 1
+                    avatarId = 1,
+                    password = password
                 )
 
                 onRegister(profile)

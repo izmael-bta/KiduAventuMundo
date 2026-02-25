@@ -38,6 +38,7 @@ import com.ismael.kiduaventumundo.kiduaventumundo.domain.operations.RegistrarUsu
 // Screens
 // ============================
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.*
+import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.*
 import com.ismael.kiduaventumundo.kiduaventumundo.front.english.*
 
 // ============================

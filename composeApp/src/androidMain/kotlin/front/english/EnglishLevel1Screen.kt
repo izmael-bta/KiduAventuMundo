@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.EnglishLevel1Data
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

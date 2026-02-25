@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -31,6 +32,7 @@ import coil.decode.ImageDecoderDecoder
 // ================= PROYECTO =================
 import com.ismael.kiduaventumundo.kiduaventumundo.R
 import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.PasswordHasher
 
 @Composable
 fun LoginScreen(
@@ -42,6 +44,7 @@ fun LoginScreen(
     val db = remember { AppDatabaseHelper(context) }
 
     var nickname by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
 
@@ -110,6 +113,17 @@ fun LoginScreen(
                     singleLine = true
                 )
 
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Contraseña") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
                 if (error != null) {
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
@@ -124,22 +138,34 @@ fun LoginScreen(
                     onClick = {
                         error = null
                         val nick = nickname.trim()
+                        val pass = password
 
                         if (nick.isBlank()) {
                             error = "Ingresa tu nickname."
                             return@Button
                         }
+                        if (pass.isBlank()) {
+                            error = "Ingresa tu contraseña."
+                            return@Button
+                        }
 
                         isLoading = true
-                        val userId = db.getUserIdByNickname(nick)
+                        val user = db.getUserByNickname(nick)
 
-                        if (userId == null) {
+                        if (user == null) {
                             error = "Usuario no encontrado."
                             isLoading = false
                             return@Button
                         }
 
-                        db.setSession(userId)
+                        val passwordHash = PasswordHasher.hash(pass)
+                        if (user.passwordHash != passwordHash) {
+                            error = "Contraseña incorrecta."
+                            isLoading = false
+                            return@Button
+                        }
+
+                        db.setSession(user.id)
                         isLoading = false
                         onLoginSuccess()
                     },

@@ -1,17 +1,27 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.ui.components
+﻿package com.ismael.kiduaventumundo.kiduaventumundo.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,7 +33,6 @@ fun RegisterCard(
     errorMessage: String? = null,
     onRegister: (UserProfileUi) -> Unit
 ) {
-
     var name by remember { mutableStateOf("") }
     var nickname by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
@@ -31,62 +40,68 @@ fun RegisterCard(
 
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(30.dp))
-            .background(Color.White.copy(alpha = 0.95f))
-            .padding(24.dp),
+            .clip(RoundedCornerShape(28.dp))
+            .background(Color.White.copy(alpha = 0.93f))
+            .padding(22.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
-            text = "Registrarse",
-            fontSize = 22.sp
+            text = "Crear cuenta",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color(0xFF1E3A5F)
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(14.dp))
 
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
             label = { Text("Nombre") },
-            modifier = Modifier.fillMaxWidth()
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(10.dp))
 
         OutlinedTextField(
             value = nickname,
             onValueChange = { nickname = it },
             label = { Text("Nickname") },
-            modifier = Modifier.fillMaxWidth()
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(10.dp))
 
         OutlinedTextField(
             value = age,
             onValueChange = { age = it },
             label = { Text("Edad") },
-            modifier = Modifier.fillMaxWidth()
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(10.dp))
 
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Contraseña") },
+            label = { Text("Contrasena") },
+            shape = RoundedCornerShape(14.dp),
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(18.dp))
 
         if (errorMessage != null) {
-            Text(
-                text = errorMessage,
-                color = MaterialTheme.colorScheme.error
-            )
-            Spacer(Modifier.height(12.dp))
+            Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
+            Spacer(Modifier.height(10.dp))
         }
 
         Button(
@@ -98,14 +113,18 @@ fun RegisterCard(
                     avatarId = 1,
                     password = password
                 )
-
                 onRegister(profile)
             },
-            shape = RoundedCornerShape(50),
-            modifier = Modifier.fillMaxWidth(0.6f)
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF4A7CDB),
+                contentColor = Color.White
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
         ) {
             Text("Continuar")
         }
     }
 }
-

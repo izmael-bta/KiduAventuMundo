@@ -1,18 +1,22 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
+﻿package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-
 import com.ismael.kiduaventumundo.kiduaventumundo.R
 import com.ismael.kiduaventumundo.kiduaventumundo.domain.operations.RegistrarUsuario
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.CloudLayer
@@ -28,8 +32,6 @@ fun RegisterScreen(
     var registerError by remember { mutableStateOf<String?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-
-        //  FONDO REGISTRO
         Image(
             painter = painterResource(id = R.drawable.fondo_registro),
             contentDescription = null,
@@ -37,19 +39,24 @@ fun RegisterScreen(
             modifier = Modifier.fillMaxSize()
         )
 
-        // CAPA DE NUBES ANIMADAS
-        CloudLayer()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0x22001838), Color(0x8A001838))
+                    )
+                )
+        )
 
+        CloudLayer()
         FlowerLayer()
 
-
-        //  REGISTRO CENTRADO
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             RegisterCard(
-                modifier = Modifier.fillMaxWidth(0.85f),
+                modifier = Modifier
+                    .fillMaxWidth(0.87f)
+                    .padding(top = 48.dp),
                 errorMessage = registerError,
                 onRegister = { profile ->
                     val result = registrarUsuario(profile)

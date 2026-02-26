@@ -17,19 +17,16 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.EnglishLevel2Data
-import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.DialogConfirmAction
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.EnglishLevelSession
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -38,47 +35,12 @@ fun EnglishLevel2Screen(
     onBack: () -> Unit,
     onFinished: () -> Unit
 ) {
-    val passStars = 13
     val questions = remember { EnglishLevel2Data.questions() }
-    val totalActivities = questions.size
-    val startIndex = remember {
-        EnglishManager.consumeStartActivity(level = 2).coerceIn(0, questions.lastIndex)
-    }
-
-    var index by remember { mutableIntStateOf(startIndex) }
-    var starsLevel by remember { mutableIntStateOf(EnglishManager.getLevelStars(2, totalActivities)) }
-    var mistakes by remember { mutableIntStateOf(0) }
-    val activityStars = remember {
-        mutableStateListOf<Int?>().apply {
-            addAll(EnglishManager.getActivityStars(level = 2, totalActivities = totalActivities))
-        }
-    }
-
-    var feedback by remember { mutableStateOf<String?>(null) }
-    var locked by remember { mutableStateOf(false) }
-
-    var showEndDialog by remember { mutableStateOf(false) }
-    var passed by remember { mutableStateOf(false) }
+    val session = remember { EnglishLevelSession(level = 2, totalActivities = questions.size) }
+    var state = remember { mutableStateOf(session.state) }
     val scope = rememberCoroutineScope()
 
-    val current = questions[index]
-
-    fun earnedStarsForThisActivity(m: Int): Int = when {
-        m == 0 -> 3
-        m == 1 -> 2
-        m == 2 -> 1
-        else -> 0
-    }
-
-    fun restartLevel() {
-        index = 0
-        starsLevel = activityStars.sumOf { it ?: 0 }
-        mistakes = 0
-        feedback = null
-        locked = false
-        showEndDialog = false
-        passed = false
-    }
+    val current = questions[state.value.index]
 
     Column(
         modifier = Modifier
@@ -87,8 +49,11 @@ fun EnglishLevel2Screen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Nivel 2: Objetos", style = MaterialTheme.typography.headlineSmall)
-        Text("* $starsLevel / $passStars", style = MaterialTheme.typography.titleMedium)
-        Text("Actividad ${index + 1} / ${questions.size}", style = MaterialTheme.typography.bodyMedium)
+        Text("* ${state.value.starsLevel} / ${state.value.passStars}", style = MaterialTheme.typography.titleMedium)
+        Text(
+            "Actividad ${state.value.index + 1} / ${state.value.totalActivities}",
+            style = MaterialTheme.typography.bodyMedium
+        )
 
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
@@ -99,7 +64,10 @@ fun EnglishLevel2Screen(
                 Spacer(Modifier.height(6.dp))
                 Text("Tap the correct object", style = MaterialTheme.typography.bodyMedium)
                 Spacer(Modifier.height(6.dp))
-                Text("Errores en esta actividad: $mistakes", style = MaterialTheme.typography.bodySmall)
+                Text(
+                    "Errores en esta actividad: ${state.value.mistakes}",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
 
@@ -114,39 +82,18 @@ fun EnglishLevel2Screen(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(84.dp)
-                                .clickable(enabled = !locked) {
-                                    val ok = opt.id == current.correctId
+                                .clickable(enabled = !state.value.locked) {
+                                    val result = session.submitSelection(
+                                        selectedId = opt.id,
+                                        correctId = current.correctId
+                                    )
+                                    state.value = result.state
 
-                                    if (ok) {
-                                        locked = true
-                                        val earned = earnedStarsForThisActivity(mistakes)
-                                        EnglishManager.recordActivityResult(
-                                            level = 2,
-                                            activityIndex = index,
-                                            starsEarned = earned,
-                                            totalActivities = totalActivities
-                                        )
-                                        activityStars[index] = maxOf(activityStars[index] ?: -1, earned)
-                                        starsLevel = activityStars.sumOf { it ?: 0 }
-                                        feedback = "+$earned *"
-
+                                    if (result.isCorrect) {
                                         scope.launch {
                                             delay(650)
-
-                                            val isLast = index == questions.lastIndex
-                                            if (!isLast) {
-                                                index++
-                                                mistakes = 0
-                                                feedback = null
-                                                locked = false
-                                            } else {
-                                                passed = starsLevel >= passStars
-                                                showEndDialog = true
-                                            }
+                                            state.value = session.advanceAfterCorrect()
                                         }
-                                    } else {
-                                        mistakes++
-                                        feedback = "Intenta otra vez"
                                     }
                                 }
                         ) {
@@ -165,7 +112,7 @@ fun EnglishLevel2Screen(
             }
         }
 
-        feedback?.let {
+        state.value.feedback?.let {
             Text(it, style = MaterialTheme.typography.titleMedium)
         }
 
@@ -176,35 +123,42 @@ fun EnglishLevel2Screen(
         }
     }
 
-    if (showEndDialog) {
+    if (state.value.showEndDialog) {
         AlertDialog(
             onDismissRequest = { },
-            title = { Text(if (passed) "Nivel completado" else "Casi") },
+            title = { Text(if (state.value.passed) "Nivel completado" else "Casi") },
             text = {
-                if (passed) {
-                    Text("Ganaste $starsLevel estrellas. Se desbloqueo el Nivel 3.")
+                if (state.value.passed) {
+                    Text("Ganaste ${state.value.starsLevel} estrellas. Se desbloqueo el Nivel 3.")
                 } else {
-                    Text("Ganaste $starsLevel estrellas. Necesitas $passStars para pasar.")
+                    Text(
+                        "Ganaste ${state.value.starsLevel} estrellas. Necesitas ${state.value.passStars} para pasar."
+                    )
                 }
             },
             confirmButton = {
-                if (passed) {
+                if (state.value.passed) {
                     Button(onClick = {
-                        EnglishManager.completeLevel(level = 2, starsEarned = starsLevel)
-                        showEndDialog = false
-                        onFinished()
+                        val action = session.confirmDialog()
+                        state.value = session.state
+                        if (action == DialogConfirmAction.CONTINUE) onFinished()
                     }) {
                         Text("Continuar")
                     }
                 } else {
-                    Button(onClick = { restartLevel() }) {
+                    Button(onClick = {
+                        val action = session.confirmDialog()
+                        if (action == DialogConfirmAction.RETRY) {
+                            state.value = session.state
+                        }
+                    }) {
                         Text("Reintentar")
                     }
                 }
             },
             dismissButton = {
                 TextButton(onClick = {
-                    showEndDialog = false
+                    state.value = session.closeDialog()
                     onBack()
                 }) {
                     Text("Salir")

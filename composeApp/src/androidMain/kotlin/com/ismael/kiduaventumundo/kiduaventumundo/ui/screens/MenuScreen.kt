@@ -25,7 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.AnimatedCircle
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.BackGroundMenu
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.Stars
@@ -34,6 +33,7 @@ import com.ismael.kiduaventumundo.kiduaventumundo.ui.viewmodel.ProfileViewModel
 @Composable
 fun MenuScreen(
     nickname: String,
+    starsCount: Int,
     profileViewModel: ProfileViewModel,
     onGoEnglish: () -> Unit,
     onGoProfile: () -> Unit
@@ -95,7 +95,7 @@ fun MenuScreen(
                     .padding(horizontal = 18.dp, vertical = 8.dp)
             ) {
                 Text(
-                    text = "${EnglishManager.stars.value} estrellas",
+                    text = "$starsCount estrellas",
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White
                 )

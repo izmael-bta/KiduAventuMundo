@@ -122,6 +122,7 @@ fun AndroidApp() {
 
             MenuScreen(
                 nickname = sessionUser.nickname,
+                starsCount = EnglishManager.stars.value,
                 profileViewModel = profileViewModel,
                 onGoEnglish = { navController.navigate(Routes.ENGLISH) },
                 onGoProfile = { navController.navigate(Routes.PROFILE) }

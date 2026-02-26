@@ -1,79 +1,193 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
+package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
 
+// ================= ANDROID SDK =================
+import android.os.Build
+
+// ================= COMPOSE - FOUNDATION =================
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+
+// ================= COMPOSE - MATERIAL =================
 import androidx.compose.material3.*
+
+// ================= COMPOSE - RUNTIME =================
 import androidx.compose.runtime.*
+
+// ================= COMPOSE - UI CORE =================
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+// ================= LIBRERÍAS EXTERNAS =================
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
+
+// ================= PROYECTO =================
+import com.ismael.kiduaventumundo.kiduaventumundo.R
 import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.PasswordHasher
 
 @Composable
 fun LoginScreen(
     onGoRegister: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
+
     val context = LocalContext.current
     val db = remember { AppDatabaseHelper(context) }
 
     var nickname by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Iniciar sesión", style = MaterialTheme.typography.headlineSmall)
-        Spacer(Modifier.height(16.dp))
+    val imageLoader = ImageLoader.Builder(context)
+        .components {
+            if (Build.VERSION.SDK_INT >= 28) {
+                add(ImageDecoderDecoder.Factory())
+            } else {
+                add(GifDecoder.Factory())
+            }
+        }
+        .build()
 
-        OutlinedTextField(
-            value = nickname,
-            onValueChange = { nickname = it },
-            label = { Text("Nickname") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        //  Fondo
+        AsyncImage(
+            model = R.drawable.fondo_registro,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
 
-        if (error != null) {
-            Spacer(Modifier.height(10.dp))
-            Text(error!!, color = MaterialTheme.colorScheme.error)
-        }
+        //  Búho animado
+        AsyncImage(
+            model = R.drawable.hello,
+            imageLoader = imageLoader,
+            contentDescription = "Buho saludando",
+            modifier = Modifier
+                .size(260.dp)
+                .align(Alignment.TopCenter)
+                .padding(top = 50.dp)
+        )
 
-        Spacer(Modifier.height(16.dp))
-        Button(
-            onClick = {
-                error = null
-                val nick = nickname.trim()
+        //  Card
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .align(Alignment.Center)
+                .offset(y = 70.dp),
+            shape = RoundedCornerShape(32.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
+        ) {
 
-                if (nick.isBlank()) {
-                    error = "Ingresa tu nickname."
-                    return@Button
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Text(
+                    text = "Iniciar Sesión",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                OutlinedTextField(
+                    value = nickname,
+                    onValueChange = { nickname = it },
+                    label = { Text("Nickname") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Contraseña") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                if (error != null) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = error!!,
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
 
-                isLoading = true
-                val userId = db.getUserIdByNickname(nick)
+                Spacer(modifier = Modifier.height(24.dp))
 
-                if (userId == null) {
-                    error = "Usuario no encontrado. Crea una cuenta."
-                    isLoading = false
-                    return@Button
+                Button(
+                    onClick = {
+                        error = null
+                        val nick = nickname.trim()
+                        val pass = password
+
+                        if (nick.isBlank()) {
+                            error = "Ingresa tu nickname."
+                            return@Button
+                        }
+                        if (pass.isBlank()) {
+                            error = "Ingresa tu contraseña."
+                            return@Button
+                        }
+
+                        isLoading = true
+                        val user = db.getUserByNickname(nick)
+
+                        if (user == null) {
+                            error = "Usuario no encontrado."
+                            isLoading = false
+                            return@Button
+                        }
+
+                        val passwordHash = PasswordHasher.hash(pass)
+                        if (user.passwordHash != passwordHash) {
+                            error = "Contraseña incorrecta."
+                            isLoading = false
+                            return@Button
+                        }
+
+                        db.setSession(user.id)
+                        isLoading = false
+                        onLoginSuccess()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    enabled = !isLoading
+                ) {
+                    Text(if (isLoading) "Entrando..." else "Entrar")
                 }
 
-                db.setSession(userId)
-                isLoading = false
-                onLoginSuccess()
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading
-        ) {
-            Text(if (isLoading) "Entrando..." else "Entrar")
-        }
+                Spacer(modifier = Modifier.height(12.dp))
 
-        Spacer(Modifier.height(10.dp))
-        TextButton(
-            onClick = onGoRegister,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading
-        ) {
-            Text("Crear cuenta")
+                //  MENSAJE
+                TextButton(
+                    onClick = onGoRegister,
+                    enabled = !isLoading
+                ) {
+                    Text("¿No tienes cuenta? Regístrate")
+                }
+            }
         }
     }
 }

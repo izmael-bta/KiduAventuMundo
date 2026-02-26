@@ -17,6 +17,7 @@ class AppDatabaseHelper(context: Context) :
                 $COL_NAME TEXT NOT NULL,
                 $COL_AGE INTEGER NOT NULL,
                 $COL_NICKNAME TEXT NOT NULL UNIQUE,
+                $COL_PASSWORD_HASH TEXT NOT NULL,
                 $COL_AVATAR_ID TEXT NOT NULL,
                 $COL_STARS INTEGER NOT NULL DEFAULT 0
             )
@@ -59,6 +60,7 @@ class AppDatabaseHelper(context: Context) :
             put(COL_NAME, user.name.trim())
             put(COL_AGE, user.age)
             put(COL_NICKNAME, user.nickname.trim())
+            put(COL_PASSWORD_HASH, user.passwordHash)
             put(COL_AVATAR_ID, user.avatarId)
             put(COL_STARS, user.stars)
         }
@@ -83,7 +85,7 @@ class AppDatabaseHelper(context: Context) :
         val db = readableDatabase
         val cursor = db.rawQuery(
             """
-            SELECT $COL_ID, $COL_NAME, $COL_AGE, $COL_NICKNAME, $COL_AVATAR_ID, $COL_STARS
+            SELECT $COL_ID, $COL_NAME, $COL_AGE, $COL_NICKNAME, $COL_PASSWORD_HASH, $COL_AVATAR_ID, $COL_STARS
             FROM $TABLE_USERS
             WHERE $COL_ID = ?
             LIMIT 1
@@ -98,8 +100,9 @@ class AppDatabaseHelper(context: Context) :
                 name = it.getString(1),
                 age = it.getInt(2),
                 nickname = it.getString(3),
-                avatarId = it.getString(4),
-                stars = it.getInt(5)
+                passwordHash = it.getString(4),
+                avatarId = it.getString(5),
+                stars = it.getInt(6)
             )
         }
     }
@@ -123,6 +126,7 @@ class AppDatabaseHelper(context: Context) :
             put(COL_NAME, user.name.trim())
             put(COL_AGE, user.age)
             put(COL_NICKNAME, user.nickname.trim())
+            put(COL_PASSWORD_HASH, user.passwordHash)
             put(COL_AVATAR_ID, user.avatarId)
             put(COL_STARS, user.stars)
         }
@@ -164,13 +168,14 @@ class AppDatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "kidu_aventumundo.db"
-        private const val DATABASE_VERSION = 2 // sube versión por cambio de esquema
+        private const val DATABASE_VERSION = 3 // sube version por cambio de esquema
 
         private const val TABLE_USERS = "users"
         private const val COL_ID = "id"
         private const val COL_NAME = "name"
         private const val COL_AGE = "age"
         private const val COL_NICKNAME = "nickname"
+        private const val COL_PASSWORD_HASH = "password_hash"
         private const val COL_AVATAR_ID = "avatar_id"
         private const val COL_STARS = "stars"
 
@@ -179,3 +184,4 @@ class AppDatabaseHelper(context: Context) :
         private const val COL_SESSION_USER_ID = "user_id"
     }
 }
+

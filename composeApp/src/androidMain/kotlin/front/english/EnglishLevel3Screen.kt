@@ -1,6 +1,8 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.front.english
 
 import androidx.compose.runtime.Composable
+import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.EnglishLevel3Data
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.EnglishQuizLevelScreen
 
 @Composable
 fun EnglishLevel3Screen(

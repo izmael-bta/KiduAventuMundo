@@ -1,6 +1,10 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.components
+package com.ismael.kiduaventumundo.kiduaventumundo.ui.components
 
 import androidx.compose.foundation.border
+
+
+
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -10,12 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.ismael.kiduaventumundo.kiduaventumundo.front.models.AvatarOption
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.model.Avatar
 
 @Composable
-fun AvatarPicker(
-    avatars: List<AvatarOption>,
+fun AvatarSelect(
+    avatars: List<Avatar>,
     selectedAvatarId: Int,
     onSelect: (Int) -> Unit
 ) {
@@ -29,12 +34,12 @@ fun AvatarPicker(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.heightIn(max = 240.dp)
         ) {
-            items(avatars) { av ->
-                val selected = av.id == selectedAvatarId
+            items(avatars) { avatar ->
+                val selected = avatar.id == selectedAvatarId
 
                 Box(
                     modifier = Modifier
-                        .size(64.dp)
+                        .size(72.dp)
                         .clip(CircleShape)
                         .border(
                             width = if (selected) 3.dp else 1.dp,
@@ -44,10 +49,14 @@ fun AvatarPicker(
                                 MaterialTheme.colorScheme.outline,
                             shape = CircleShape
                         )
-                        .clickable { onSelect(av.id) },
+                        .clickable { onSelect(avatar.id) },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(av.label.take(1))
+                    Image(
+                        painter = painterResource(id = avatar.imageRes),
+                        contentDescription = null,
+                        modifier = Modifier.size(56.dp)
+                    )
                 }
             }
         }

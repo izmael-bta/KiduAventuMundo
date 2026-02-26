@@ -1,46 +1,59 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.ui.navigation
 
-import androidx.compose.runtime.LaunchedEffect
+// ============================
+// Compose Core
+// ============================
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+
+// ============================
+// Navigation
+// ============================
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
-import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishActivitiesScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel1Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel1Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel2Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel2Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel3Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel3Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel4Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel4Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel5Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel5Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel6Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel6Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel7Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel7Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel8Data
-import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel8Screen
-import com.ismael.kiduaventumundo.kiduaventumundo.front.models.DefaultAvatars
-import com.ismael.kiduaventumundo.kiduaventumundo.front.models.UserProfileUi
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.model.User
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.EnglishMenuScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.LoginScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.MenuScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.ProfileScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.RegisterScreen
-import com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.SplashScreen
 
+// ============================
+// ViewModel
+// ============================
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.viewmodel.ProfileViewModel
+
+// ============================
+// Database
+// ============================
+import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
+
+// ============================
+// Logic
+// ============================
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
+import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.EnglishMenuScreen
+import com.ismael.kiduaventumundo.kiduaventumundo.datasource.repository.UserRepositoryImpl
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.operations.RegistrarUsuario
+
+// ============================
+// Screens
+// ============================
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.*
+import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.*
+import com.ismael.kiduaventumundo.kiduaventumundo.front.english.*
+
+// ============================
+// Models
+// ============================
+import front.models.UserProfileUi
 @Composable
 fun AndroidApp() {
+
     val context = LocalContext.current
     val db = remember { AppDatabaseHelper(context) }
     val navController = rememberNavController()
+
+    //  VIEWMODEL COMPARTIDO ENTRE MENU Y PROFILE
+    val profileViewModel: ProfileViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -78,34 +91,23 @@ fun AndroidApp() {
 
         // ---------------- REGISTER ----------------
         composable(Routes.REGISTER) {
-            RegisterScreen(
-                avatars = DefaultAvatars,
-                onCreate = { profile ->
-                    if (db.nicknameExists(profile.username.trim())) {
-                        return@RegisterScreen
-                    }
-                    val newId = db.registerUser(
-                        User(
-                            name = profile.name.trim(),
-                            age = profile.age,
-                            nickname = profile.username.trim(),
-                            avatarId = "avatar_${profile.avatarId}",
-                            stars = 0
-                        )
-                    )
-                    if (newId == -1L) return@RegisterScreen
 
-                    db.setSession(newId)
+            val repository = UserRepositoryImpl(db)
+            val registrarUsuario = RegistrarUsuario(repository)
+
+            RegisterScreen(
+                registrarUsuario = registrarUsuario,
+                onRegisterSuccess = {
                     navController.navigate(Routes.MENU) {
                         popUpTo(Routes.REGISTER) { inclusive = true }
                     }
-                },
-                onGoLogin = { navController.popBackStack() }
+                }
             )
         }
 
         // ---------------- MENU ----------------
         composable(Routes.MENU) {
+
             val sessionUserId = db.getSessionUserId()
             val sessionUser = sessionUserId?.let { db.getUserById(it) }
 
@@ -120,12 +122,15 @@ fun AndroidApp() {
 
             MenuScreen(
                 nickname = sessionUser.nickname,
+                profileViewModel = profileViewModel,
                 onGoEnglish = { navController.navigate(Routes.ENGLISH) },
                 onGoProfile = { navController.navigate(Routes.PROFILE) }
             )
         }
 
+        // ---------------- PROFILE ----------------
         composable(Routes.PROFILE) {
+
             val sessionUserId = db.getSessionUserId()
             val sessionUser = sessionUserId?.let { db.getUserById(it) }
 
@@ -138,45 +143,76 @@ fun AndroidApp() {
                 return@composable
             }
 
+            // 🔥 Sincronizar avatar guardado
+            LaunchedEffect(Unit) {
+                val savedAvatarId = sessionUser.avatarId
+                    .filter { it.isDigit() }
+                    .toIntOrNull()
+
+                savedAvatarId?.let { id ->
+                    profileViewModel.avatars
+                        .find { it.id == id }
+                        ?.let { avatar ->
+                            profileViewModel.setAvatar(avatar)
+                        }
+                }
+            }
+
             ProfileScreen(
-                avatars = DefaultAvatars,
                 profile = UserProfileUi(
                     name = sessionUser.name,
                     age = sessionUser.age,
                     username = sessionUser.nickname,
-                    avatarId = sessionUser.avatarId.filter { it.isDigit() }.toIntOrNull() ?: 1
+                    avatarId = sessionUser.avatarId
+                        .filter { it.isDigit() }
+                        .toIntOrNull() ?: 1
                 ),
-                onSave = { updatedProfile ->
+                avatars = profileViewModel.avatars,
+                selectedAvatar = profileViewModel.selectedAvatar,
+                onAvatarSelected = { avatar ->
+                    profileViewModel.setAvatar(avatar)
+                },
+                onSaveAvatar = {
                     db.updateUserAvatar(
                         userId = sessionUser.id,
-                        avatarId = "avatar_${updatedProfile.avatarId}"
+                        avatarId = "avatar_${profileViewModel.selectedAvatar.id}"
                     )
                     navController.popBackStack()
                 },
                 onLogout = {
                     db.clearSession()
                     navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.MENU) { inclusive = true }
-                        popUpTo(Routes.PROFILE) { inclusive = true }
+                        popUpTo(0)
                     }
-                },
-                onBack = { navController.popBackStack() },
+                }
             )
         }
 
         // ---------------- ENGLISH LEVEL MENU ----------------
         composable(Routes.ENGLISH) {
+
             val levels = EnglishManager.getLevels()
 
             EnglishMenuScreen(
                 levels = levels,
                 onBack = { navController.popBackStack() },
-                onLevelClick = { level -> navController.navigate(Routes.englishActivities(level)) }
+                onLevelClick = { level ->
+                    navController.navigate(Routes.englishActivities(level))
+                }
             )
         }
+
+        // ---------------- ENGLISH ACTIVITIES ----------------
         composable(Routes.ENGLISH_ACTIVITIES) { backStackEntry ->
-            val level = backStackEntry.arguments?.getString("level")?.toIntOrNull() ?: 1
-            val levelTitle = EnglishManager.getLevels().firstOrNull { it.level == level }?.title ?: "Nivel $level"
+
+            val level = backStackEntry.arguments
+                ?.getString("level")
+                ?.toIntOrNull() ?: 1
+
+            val levelTitle = EnglishManager.getLevels()
+                .firstOrNull { it.level == level }
+                ?.title ?: "Nivel $level"
+
             val totalActivities = when (level) {
                 1 -> EnglishLevel1Data.questions().size
                 2 -> EnglishLevel2Data.questions().size
@@ -209,52 +245,57 @@ fun AndroidApp() {
                 }
             )
         }
+
+        // ---------------- LEVEL SCREENS ----------------
         composable(Routes.ENGLISH_LEVEL_1) {
             EnglishLevel1Screen(
                 onBack = { navController.popBackStack() },
-                onFinished = {
-                    navController.popBackStack()
-                }
+                onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_2) {
             EnglishLevel2Screen(
                 onBack = { navController.popBackStack() },
-                onFinished = {
-                    navController.popBackStack()
-                }
+                onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_3) {
             EnglishLevel3Screen(
                 onBack = { navController.popBackStack() },
                 onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_4) {
             EnglishLevel4Screen(
                 onBack = { navController.popBackStack() },
                 onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_5) {
             EnglishLevel5Screen(
                 onBack = { navController.popBackStack() },
                 onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_6) {
             EnglishLevel6Screen(
                 onBack = { navController.popBackStack() },
                 onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_7) {
             EnglishLevel7Screen(
                 onBack = { navController.popBackStack() },
                 onFinished = { navController.popBackStack() }
             )
         }
+
         composable(Routes.ENGLISH_LEVEL_8) {
             EnglishLevel8Screen(
                 onBack = { navController.popBackStack() },
@@ -263,4 +304,3 @@ fun AndroidApp() {
         }
     }
 }
-

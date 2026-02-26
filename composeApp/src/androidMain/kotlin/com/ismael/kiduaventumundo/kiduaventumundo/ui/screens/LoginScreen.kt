@@ -41,7 +41,8 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.ismael.kiduaventumundo.kiduaventumundo.R
 import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
-import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.PasswordHasher
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.LoginResult
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.LoginService
 
 @Composable
 fun LoginScreen(
@@ -49,7 +50,7 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit
 ) {
     val context = LocalContext.current
-    val db = remember { AppDatabaseHelper(context) }
+    val loginService = remember { LoginService(AppDatabaseHelper(context)) }
 
     var nickname by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -154,38 +155,18 @@ fun LoginScreen(
 
                 Button(
                     onClick = {
-                        error = null
-                        val nick = nickname.trim()
-                        val pass = password
-
-                        if (nick.isBlank()) {
-                            error = "Ingresa tu nickname."
-                            return@Button
-                        }
-                        if (pass.isBlank()) {
-                            error = "Ingresa tu contrasena."
-                            return@Button
-                        }
-
                         isLoading = true
-                        val user = db.getUserByNickname(nick)
-
-                        if (user == null) {
-                            error = "Usuario no encontrado."
-                            isLoading = false
-                            return@Button
+                        when (val result = loginService.login(nickname, password)) {
+                            is LoginResult.Success -> {
+                                error = null
+                                isLoading = false
+                                onLoginSuccess()
+                            }
+                            is LoginResult.Error -> {
+                                error = result.message
+                                isLoading = false
+                            }
                         }
-
-                        val passwordHash = PasswordHasher.hash(pass)
-                        if (user.passwordHash != passwordHash) {
-                            error = "Contrasena incorrecta."
-                            isLoading = false
-                            return@Button
-                        }
-
-                        db.setSession(user.id)
-                        isLoading = false
-                        onLoginSuccess()
                     },
                     modifier = Modifier
                         .fillMaxWidth()

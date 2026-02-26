@@ -17,12 +17,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.ismael.kiduaventumundo.kiduaventumundo.R
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.RegisterSubmitResult
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.RegisterSubmitter
 import com.ismael.kiduaventumundo.kiduaventumundo.domain.operations.RegistrarUsuario
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.CloudLayer
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.FlowerLayer
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.RegisterCard
-import com.ismael.kiduaventumundo.ui.viewmodel.RegisterResult
 
 @Composable
 fun RegisterScreen(
@@ -59,12 +61,14 @@ fun RegisterScreen(
                     .padding(top = 48.dp),
                 errorMessage = registerError,
                 onRegister = { profile ->
-                    val result = registrarUsuario(profile)
-                    if (result is RegisterResult.Success) {
-                        registerError = null
-                        onRegisterSuccess()
-                    } else if (result is RegisterResult.Error) {
-                        registerError = result.message
+                    when (val result = RegisterSubmitter.submit(registrarUsuario, profile)) {
+                        is RegisterSubmitResult.Success -> {
+                            registerError = null
+                            onRegisterSuccess()
+                        }
+                        is RegisterSubmitResult.Error -> {
+                            registerError = result.message
+                        }
                     }
                 }
             )

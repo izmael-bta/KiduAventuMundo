@@ -15,7 +15,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.ActivityStatus
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.EnglishActivitiesUseCase
 
 @Composable
 fun EnglishActivitiesScreen(
@@ -25,8 +26,7 @@ fun EnglishActivitiesScreen(
     onBack: () -> Unit,
     onStartActivity: (Int) -> Unit
 ) {
-    val starsByActivity = EnglishManager.getActivityStars(level, totalActivities)
-    val activities = (0 until totalActivities).toList()
+    val activities = EnglishActivitiesUseCase.getActivities(level, totalActivities)
 
     Column(
         modifier = Modifier
@@ -41,26 +41,25 @@ fun EnglishActivitiesScreen(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(activities) { activityIndex ->
-                val earned = starsByActivity[activityIndex]
-                val unlocked = activityIndex == 0 || starsByActivity[activityIndex - 1] != null
-                val status = when {
-                    earned != null -> "Completada"
-                    unlocked -> "Disponible"
-                    else -> "Bloqueada"
+            items(activities) { activity ->
+                val status = when (activity.status) {
+                    ActivityStatus.COMPLETED -> "Completada"
+                    ActivityStatus.AVAILABLE -> "Disponible"
+                    ActivityStatus.BLOCKED -> "Bloqueada"
                 }
-                val starsText = earned?.let { "$it *" } ?: "-"
+                val starsText = activity.earnedStars?.let { "$it *" } ?: "-"
+                val unlocked = activity.status != ActivityStatus.BLOCKED
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        "Actividad ${activityIndex + 1}: $status | Estrellas: $starsText",
+                        "Actividad ${activity.activityIndex + 1}: $status | Estrellas: $starsText",
                         modifier = Modifier.weight(1f)
                     )
                     Button(
-                        onClick = { onStartActivity(activityIndex) },
+                        onClick = { onStartActivity(activity.activityIndex) },
                         enabled = unlocked
                     ) {
                         Text("Jugar")

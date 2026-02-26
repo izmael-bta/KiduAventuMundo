@@ -1,35 +1,44 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
+﻿package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
 
-// ================= ANDROID SDK =================
 import android.os.Build
-
-// ================= COMPOSE - FOUNDATION =================
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-
-// ================= COMPOSE - MATERIAL =================
-import androidx.compose.material3.*
-
-// ================= COMPOSE - RUNTIME =================
-import androidx.compose.runtime.*
-
-// ================= COMPOSE - UI CORE =================
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-// ================= LIBRERÍAS EXTERNAS =================
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
-
-// ================= PROYECTO =================
 import com.ismael.kiduaventumundo.kiduaventumundo.R
 import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.PasswordHasher
@@ -39,7 +48,6 @@ fun LoginScreen(
     onGoRegister: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
-
     val context = LocalContext.current
     val db = remember { AppDatabaseHelper(context) }
 
@@ -59,8 +67,6 @@ fun LoginScreen(
         .build()
 
     Box(modifier = Modifier.fillMaxSize()) {
-
-        //  Fondo
         AsyncImage(
             model = R.drawable.fondo_registro,
             contentDescription = null,
@@ -68,71 +74,83 @@ fun LoginScreen(
             contentScale = ContentScale.Crop
         )
 
-        //  Búho animado
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0x3300152F), Color(0x8800152F))
+                    )
+                )
+        )
+
         AsyncImage(
             model = R.drawable.hello,
             imageLoader = imageLoader,
             contentDescription = "Buho saludando",
             modifier = Modifier
-                .size(260.dp)
+                .size(230.dp)
                 .align(Alignment.TopCenter)
-                .padding(top = 50.dp)
+                .padding(top = 32.dp)
         )
 
-        //  Card
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 20.dp)
                 .align(Alignment.Center)
-                .offset(y = 70.dp),
-            shape = RoundedCornerShape(32.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
+                .offset(y = 58.dp),
+            shape = RoundedCornerShape(28.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.93f))
         ) {
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
+                    .padding(22.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 Text(
-                    text = "Iniciar Sesión",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                    text = "Iniciar sesion",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF1E3A5F)
+                )
+                Text(
+                    text = "Bienvenido de nuevo",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF57718F)
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 OutlinedTextField(
                     value = nickname,
                     onValueChange = { nickname = it },
                     label = { Text("Nickname") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    shape = RoundedCornerShape(14.dp)
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Contraseña") },
+                    label = { Text("Contrasena") },
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    shape = RoundedCornerShape(14.dp)
                 )
 
                 if (error != null) {
                     Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = error!!,
-                        color = MaterialTheme.colorScheme.error
-                    )
+                    Text(text = error!!, color = MaterialTheme.colorScheme.error)
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Button(
                     onClick = {
@@ -145,7 +163,7 @@ fun LoginScreen(
                             return@Button
                         }
                         if (pass.isBlank()) {
-                            error = "Ingresa tu contraseña."
+                            error = "Ingresa tu contrasena."
                             return@Button
                         }
 
@@ -160,7 +178,7 @@ fun LoginScreen(
 
                         val passwordHash = PasswordHasher.hash(pass)
                         if (user.passwordHash != passwordHash) {
-                            error = "Contraseña incorrecta."
+                            error = "Contrasena incorrecta."
                             isLoading = false
                             return@Button
                         }
@@ -171,21 +189,21 @@ fun LoginScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(55.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    enabled = !isLoading
+                        .height(54.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    enabled = !isLoading,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4A7CDB),
+                        contentColor = Color.White
+                    )
                 ) {
                     Text(if (isLoading) "Entrando..." else "Entrar")
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                //  MENSAJE
-                TextButton(
-                    onClick = onGoRegister,
-                    enabled = !isLoading
-                ) {
-                    Text("¿No tienes cuenta? Regístrate")
+                TextButton(onClick = onGoRegister, enabled = !isLoading) {
+                    Text("No tienes cuenta? Registrate")
                 }
             }
         }

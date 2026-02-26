@@ -1,18 +1,38 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
+﻿package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -35,12 +55,10 @@ fun SplashScreen(
     onGoLogin: () -> Unit,
     onGoMenu: () -> Unit
 ) {
-
     val goNext = { if (hasSession) onGoMenu() else onGoLogin() }
 
-    val infiniteTransition = rememberInfiniteTransition(label = "owl")
-
-    val floatY by infiniteTransition.animateFloat(
+    val transition = rememberInfiniteTransition(label = "splash")
+    val floatY by transition.animateFloat(
         initialValue = -10f,
         targetValue = 10f,
         animationSpec = infiniteRepeatable(
@@ -49,8 +67,7 @@ fun SplashScreen(
         ),
         label = "float"
     )
-
-    val scale by infiniteTransition.animateFloat(
+    val scale by transition.animateFloat(
         initialValue = 0.98f,
         targetValue = 1.04f,
         animationSpec = infiniteRepeatable(
@@ -60,12 +77,7 @@ fun SplashScreen(
         label = "scale"
     )
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-
-
+    Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(Res.drawable.fondo_inicio),
             contentDescription = null,
@@ -73,58 +85,74 @@ fun SplashScreen(
             contentScale = ContentScale.Crop
         )
 
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0x33002244),
+                            Color(0x66001133)
+                        )
+                    )
+                )
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(vertical = 60.dp),
+                .padding(horizontal = 24.dp, vertical = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
+            Spacer(modifier = Modifier.height(1.dp))
 
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color(0xFF0A4DB5),
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 44.sp
+                            )
+                        ) { append("Kidu ") }
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color(0xFFE45A35),
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 44.sp
+                            )
+                        ) { append("World") }
+                    }
+                )
 
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            color = Color(0xFF063697),
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 42.sp
-                        )
-                    ) { append("Kidu ") }
+                Text(
+                    text = "Aprender jugando",
+                    color = Color.White.copy(alpha = 0.92f),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
 
-                    withStyle(
-                        style = SpanStyle(
-                            color = Color(0xFF820802),
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 42.sp
-                        )
-                    ) { append("World") }
-                }
-            )
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // Pajaro ese  ANIMADO
-            Image(
-                painter = painterResource(Res.drawable.logo1),
-                contentDescription = "Logo",
-                modifier = Modifier
-                    .size(260.dp)
-                    .offset(y = floatY.dp)
-                    .scale(scale)
-            )
+                Image(
+                    painter = painterResource(Res.drawable.logo1),
+                    contentDescription = "Logo",
+                    modifier = Modifier
+                        .size(250.dp)
+                        .offset(y = floatY.dp)
+                        .scale(scale)
+                )
+            }
 
-
-            SwipeToStart(
-                onComplete = { goNext() }
-            )
+            SwipeToStart(onComplete = goNext)
         }
     }
 }
 
 @Composable
-fun SwipeToStart(
-    onComplete: () -> Unit
-) {
-
+fun SwipeToStart(onComplete: () -> Unit) {
     val trackWidth = 320.dp
     val thumbSize = 64.dp
 
@@ -133,17 +161,16 @@ fun SwipeToStart(
     }
 
     var offsetX by remember { mutableStateOf(0f) }
-    val animatedOffsetX by animateFloatAsState(offsetX)
+    val animatedOffsetX by animateFloatAsState(targetValue = offsetX, label = "swipe")
 
     Box(
         modifier = Modifier
             .width(trackWidth)
             .height(70.dp)
-            .clip(RoundedCornerShape(100)) // Bordes totalmente redondeados
-            .background(Color.White.copy(alpha = 0.25f)),
+            .clip(RoundedCornerShape(999.dp))
+            .background(Color.White.copy(alpha = 0.24f)),
         contentAlignment = Alignment.CenterStart
     ) {
-
         Text(
             text = "Desliza para comenzar",
             color = Color.White,
@@ -156,13 +183,12 @@ fun SwipeToStart(
                 .offset { IntOffset(animatedOffsetX.toInt(), 0) }
                 .size(thumbSize)
                 .clip(CircleShape)
-                .background(Color(0xFF4CAF50))
+                .background(Color(0xFF2E7D32))
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDrag = { change, dragAmount ->
                             change.consume()
-                            offsetX = (offsetX + dragAmount.x)
-                                .coerceIn(0f, maxWidthPx)
+                            offsetX = (offsetX + dragAmount.x).coerceIn(0f, maxWidthPx)
                         },
                         onDragEnd = {
                             if (offsetX > maxWidthPx * 0.85f) {
@@ -176,160 +202,11 @@ fun SwipeToStart(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "➜",
+                text = ">",
                 color = Color.White,
-                fontSize = 20.sp
+                fontSize = 22.sp,
+                fontWeight = FontWeight.ExtraBold
             )
         }
     }
 }
-
-
-/*
-@Composable
-fun SplashScreen(
-    hasSession: Boolean,
-    onGoLogin: () -> Unit,
-    onGoMenu: () -> Unit
-) {
-
-    val goNext = { if (hasSession) onGoMenu() else onGoLogin() }
-
-    // Animaciones del búho
-    val infiniteTransition = rememberInfiniteTransition(label = "animations")
-
-    val offsetY by infiniteTransition.animateFloat(
-        initialValue = -15f,
-        targetValue = 15f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "float"
-    )
-
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 0.95f,
-        targetValue = 1.05f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "breathing"
-    )
-
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-
-        // Fondo
-        Image(
-            painter = painterResource(Res.drawable.fondo_inicio),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
-
-            // Título
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            color = Color(0xFF063697),
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 55.sp
-                        )
-                    ) { append("Kidu") }
-
-                    withStyle(
-                        style = SpanStyle(
-                            color = Color(0xFF820802),
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 55.sp
-                        )
-                    ) { append("World") }
-                }
-            )
-
-            // Búho animado
-            Image(
-                painter = painterResource(Res.drawable.logo1),
-                contentDescription = "Logo Kidu",
-                modifier = Modifier
-                    .size(300.dp)
-                    .offset(y = offsetY.dp)
-                    .scale(scale)
-            )
-
-            // Swipe
-            SwipeToStart(
-                onComplete = { goNext() }
-            )
-        }
-    }
-}
-
-@Composable
-fun SwipeToStart(
-    onComplete: () -> Unit
-) {
-
-    val maxWidth = 280.dp
-    val circleSize = 60.dp
-
-    val maxWidthPx = with(LocalDensity.current) {
-        (maxWidth - circleSize).toPx()
-    }
-
-    var offsetX by remember { mutableStateOf(0f) }
-    val animatedOffsetX by animateFloatAsState(offsetX)
-
-    Box(
-        modifier = Modifier
-            .width(maxWidth)
-            .height(circleSize)
-            .background(Color.White.copy(alpha = 0.2f), CircleShape)
-    ) {
-
-        Text(
-            text = "Desliza para comenzar",
-            color = Color.White,
-            modifier = Modifier.align(Alignment.Center)
-        )
-
-        Box(
-            modifier = Modifier
-                .offset { IntOffset(animatedOffsetX.toInt(), 0) }
-                .size(circleSize)
-                .background(Color(0xFF4CAF50), CircleShape)
-                .pointerInput(Unit) {
-                    detectDragGestures(
-                        onDrag = { change, dragAmount ->
-                            change.consume()
-                            offsetX = (offsetX + dragAmount.x)
-                                .coerceIn(0f, maxWidthPx)
-                        },
-                        onDragEnd = {
-                            if (offsetX > maxWidthPx * 0.8f) {
-                                onComplete()
-                            } else {
-                                offsetX = 0f
-                            }
-                        }
-                    )
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(">", color = Color.White)
-        }
-    }
-}
-
- */

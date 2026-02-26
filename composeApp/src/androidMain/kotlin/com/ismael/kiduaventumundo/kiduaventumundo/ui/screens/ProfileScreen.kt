@@ -1,28 +1,5 @@
-package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
+﻿package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
 
-// ============================
-// Android / Context
-// ============================
-import androidx.compose.ui.platform.LocalContext
-
-// ============================
-// Compose Foundation
-// ============================
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-
-// ============================
-// Animations
-// ============================
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
@@ -32,27 +9,36 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-
-// ============================
-// Material 3
-// ============================
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
-
-// ============================
-// Runtime
-// ============================
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-
-// ============================
-// UI
-// ============================
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,14 +47,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-// ============================
-// Project
-// ============================
 import com.ismael.kiduaventumundo.kiduaventumundo.R
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.model.Avatar
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.utils.SoundManager
@@ -83,32 +66,27 @@ fun ProfileScreen(
     onSaveAvatar: () -> Unit,
     onLogout: () -> Unit
 ) {
-
     var tempSelectedAvatar by remember { mutableStateOf(selectedAvatar) }
 
     val context = LocalContext.current
     val soundManager = remember { SoundManager(context) }
 
     DisposableEffect(Unit) {
-        onDispose {
-            soundManager.release()
-        }
+        onDispose { soundManager.release() }
     }
 
-    // Animación flotante avatar principal
-    val infiniteTransition = rememberInfiniteTransition(label = "")
+    val infiniteTransition = rememberInfiniteTransition(label = "profile")
     val floatOffset by infiniteTransition.animateFloat(
         initialValue = -10f,
         targetValue = 10f,
         animationSpec = infiniteRepeatable(
             animation = tween(3000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
-        ), label = ""
+        ),
+        label = "avatarFloat"
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
-
-        // Fondo
         Image(
             painter = painterResource(id = R.drawable.fondo_saf),
             contentDescription = null,
@@ -116,24 +94,30 @@ fun ProfileScreen(
             modifier = Modifier.fillMaxSize()
         )
 
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0x2200142C), Color(0x6E00142C))
+                    )
+                )
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(44.dp))
 
-            Spacer(modifier = Modifier.height(60.dp))
-
-            // =============================
-            // AVATAR PRINCIPAL
-            // =============================
             Box(
                 modifier = Modifier
                     .offset(y = floatOffset.dp)
-                    .size(170.dp)
-                    .shadow(20.dp, CircleShape)
+                    .size(164.dp)
+                    .shadow(18.dp, CircleShape)
                     .clip(CircleShape)
                     .background(Color(0xFFFFE082))
                     .padding(16.dp),
@@ -147,76 +131,62 @@ fun ProfileScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // =============================
-            // CARD GLASS
-            // =============================
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(18.dp, RoundedCornerShape(28.dp))
-                    .clip(RoundedCornerShape(28.dp))
-                    .background(Color.White.copy(alpha = 0.85f))
-                    .padding(vertical = 30.dp)
+                    .shadow(14.dp, RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.White.copy(alpha = 0.9f))
+                    .padding(vertical = 24.dp, horizontal = 20.dp)
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
                     Text(
                         text = profile.name.uppercase(),
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2F2F2F)
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF23364E)
                     )
-
                     Spacer(modifier = Modifier.height(6.dp))
-
                     Text(
                         text = "@${profile.username}",
                         fontSize = 15.sp,
-                        color = Color(0xFF555555)
+                        color = Color(0xFF4F6278)
                     )
-
                     Spacer(modifier = Modifier.height(4.dp))
-
                     Text(
-                        text = "${profile.age} años",
+                        text = "${profile.age} anos",
                         fontSize = 14.sp,
-                        color = Color(0xFF777777)
+                        color = Color(0xFF61788F)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             Text(
                 text = "Elige tu avatar",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 color = Color.White
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // =============================
-            // SELECTOR CON ANIMACIÓN
-            // =============================
             LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
                 items(avatars) { avatar ->
-
                     val isSelected = avatar.id == tempSelectedAvatar.id
-
                     val scale by animateFloatAsState(
-                        targetValue = if (isSelected) 1.15f else 1f,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy
-                        ), label = ""
+                        targetValue = if (isSelected) 1.12f else 1f,
+                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+                        label = "avatarScale"
                     )
 
                     Box(
@@ -225,27 +195,25 @@ fun ProfileScreen(
                                 scaleX = scale
                                 scaleY = scale
                             }
-                            .size(95.dp)
+                            .size(90.dp)
                             .shadow(
-                                elevation = if (isSelected) 16.dp else 6.dp,
+                                elevation = if (isSelected) 14.dp else 5.dp,
                                 shape = CircleShape
                             )
                             .clip(CircleShape)
                             .background(
-                                brush = if (isSelected)
+                                brush = if (isSelected) {
                                     Brush.radialGradient(
-                                        colors = listOf(
-                                            Color(0xFFFFF176),
-                                            Color(0xFFFFC107)
+                                        listOf(Color(0xFFFFF176), Color(0xFFFFC107))
+                                    )
+                                } else {
+                                    Brush.radialGradient(
+                                        listOf(
+                                            Color.White.copy(alpha = 0.35f),
+                                            Color.White.copy(alpha = 0.25f)
                                         )
                                     )
-                                else
-                                    Brush.radialGradient(
-                                        colors = listOf(
-                                            Color.White.copy(alpha = 0.30f),
-                                            Color.White.copy(alpha = 0.30f)
-                                        )
-                                    )
+                                }
                             )
                             .border(
                                 width = if (isSelected) 0.dp else 2.dp,
@@ -258,7 +226,7 @@ fun ProfileScreen(
                                     soundManager.playSound(avatar.id)
                                 }
                             }
-                            .padding(12.dp),
+                            .padding(11.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
@@ -271,11 +239,8 @@ fun ProfileScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.height(34.dp))
 
-            // =============================
-            // BOTÓN
-            // =============================
             Button(
                 onClick = {
                     onAvatarSelected(tempSelectedAvatar)
@@ -283,59 +248,39 @@ fun ProfileScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(64.dp)
-                    .shadow(18.dp, RoundedCornerShape(30.dp)),
-                shape = RoundedCornerShape(30.dp),
+                    .height(60.dp)
+                    .shadow(14.dp, RoundedCornerShape(26.dp)),
+                shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent
-                ),
-                contentPadding = PaddingValues()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                listOf(
-                                    Color(0xFF58CC02),
-                                    Color(0xFF46A302)
-                                )
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Guardar avatar",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            Button(
-                onClick = { onLogout() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .shadow(12.dp, RoundedCornerShape(24.dp)),
-                shape = RoundedCornerShape(24.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFFE5E5), // fondo rojo suave
-                    contentColor = Color(0xFFB3261E)
-                ),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 0.dp
+                    containerColor = Color(0xFF4A7CDB),
+                    contentColor = Color.White
                 )
             ) {
                 Text(
-                    text = "Cerrar sesión",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
+                    text = "Guardar avatar",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Button(
+                onClick = onLogout,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                shape = RoundedCornerShape(22.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFFE5E5),
+                    contentColor = Color(0xFFB3261E)
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+            ) {
+                Text(text = "Cerrar sesion", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

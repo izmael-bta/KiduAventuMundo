@@ -19,6 +19,8 @@ class AppDatabaseHelper(context: Context) :
                 $COL_NICKNAME TEXT NOT NULL UNIQUE,
                 $COL_PASSWORD_HASH TEXT NOT NULL,
                 $COL_AVATAR_ID TEXT NOT NULL,
+                $COL_SECURITY_QUESTION TEXT NOT NULL,
+                $COL_SECURITY_ANSWER_HASH TEXT NOT NULL,
                 $COL_STARS INTEGER NOT NULL DEFAULT 0
             )
             """.trimIndent()
@@ -62,6 +64,8 @@ class AppDatabaseHelper(context: Context) :
             put(COL_NICKNAME, user.nickname.trim())
             put(COL_PASSWORD_HASH, user.passwordHash)
             put(COL_AVATAR_ID, user.avatarId)
+            put(COL_SECURITY_QUESTION, user.securityQuestion.trim())
+            put(COL_SECURITY_ANSWER_HASH, user.securityAnswerHash)
             put(COL_STARS, user.stars)
         }
         return db.insert(TABLE_USERS, null, values)
@@ -85,7 +89,7 @@ class AppDatabaseHelper(context: Context) :
         val db = readableDatabase
         val cursor = db.rawQuery(
             """
-            SELECT $COL_ID, $COL_NAME, $COL_AGE, $COL_NICKNAME, $COL_PASSWORD_HASH, $COL_AVATAR_ID, $COL_STARS
+            SELECT $COL_ID, $COL_NAME, $COL_AGE, $COL_NICKNAME, $COL_PASSWORD_HASH, $COL_AVATAR_ID, $COL_SECURITY_QUESTION, $COL_SECURITY_ANSWER_HASH, $COL_STARS
             FROM $TABLE_USERS
             WHERE $COL_ID = ?
             LIMIT 1
@@ -102,7 +106,9 @@ class AppDatabaseHelper(context: Context) :
                 nickname = it.getString(3),
                 passwordHash = it.getString(4),
                 avatarId = it.getString(5),
-                stars = it.getInt(6)
+                securityQuestion = it.getString(6),
+                securityAnswerHash = it.getString(7),
+                stars = it.getInt(8)
             )
         }
     }
@@ -128,6 +134,8 @@ class AppDatabaseHelper(context: Context) :
             put(COL_NICKNAME, user.nickname.trim())
             put(COL_PASSWORD_HASH, user.passwordHash)
             put(COL_AVATAR_ID, user.avatarId)
+            put(COL_SECURITY_QUESTION, user.securityQuestion.trim())
+            put(COL_SECURITY_ANSWER_HASH, user.securityAnswerHash)
             put(COL_STARS, user.stars)
         }
 
@@ -136,6 +144,19 @@ class AppDatabaseHelper(context: Context) :
             values,
             "$COL_ID = ?",
             arrayOf(user.id.toString())
+        ) > 0
+    }
+
+    fun updateUserPassword(userId: Long, passwordHash: String): Boolean {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COL_PASSWORD_HASH, passwordHash)
+        }
+        return db.update(
+            TABLE_USERS,
+            values,
+            "$COL_ID = ?",
+            arrayOf(userId.toString())
         ) > 0
     }
 
@@ -168,7 +189,7 @@ class AppDatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "kidu_aventumundo.db"
-        private const val DATABASE_VERSION = 3 // sube version por cambio de esquema
+        private const val DATABASE_VERSION = 4 // sube version por cambio de esquema
 
         private const val TABLE_USERS = "users"
         private const val COL_ID = "id"
@@ -177,6 +198,8 @@ class AppDatabaseHelper(context: Context) :
         private const val COL_NICKNAME = "nickname"
         private const val COL_PASSWORD_HASH = "password_hash"
         private const val COL_AVATAR_ID = "avatar_id"
+        private const val COL_SECURITY_QUESTION = "security_question"
+        private const val COL_SECURITY_ANSWER_HASH = "security_answer_hash"
         private const val COL_STARS = "stars"
 
         private const val TABLE_SESSION = "session"

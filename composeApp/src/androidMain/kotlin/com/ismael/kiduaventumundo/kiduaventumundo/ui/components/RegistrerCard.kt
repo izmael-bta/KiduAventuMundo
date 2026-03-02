@@ -2,6 +2,7 @@
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import front.models.UserProfileUi
+import kotlin.random.Random
 
 @Composable
 fun RegisterCard(
@@ -33,10 +35,21 @@ fun RegisterCard(
     errorMessage: String? = null,
     onRegister: (UserProfileUi) -> Unit
 ) {
+    val securityQuestions = remember {
+        listOf(
+            "Como se llamaba tu primera mascota?",
+            "Cual era tu comida favorita de nino?",
+            "En que ciudad naciste?",
+            "Cual es el nombre de tu mejor amigo de infancia?",
+            "Cual es tu color favorito?"
+        )
+    }
     var name by remember { mutableStateOf("") }
     var nickname by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var securityQuestion by remember { mutableStateOf(securityQuestions.random(Random(System.currentTimeMillis()))) }
+    var securityAnswer by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -97,6 +110,54 @@ fun RegisterCard(
             singleLine = true
         )
 
+        Spacer(Modifier.height(10.dp))
+
+        Text(
+            text = "Pregunta de seguridad",
+            fontWeight = FontWeight.SemiBold,
+            color = Color(0xFF1E3A5F),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(Modifier.height(6.dp))
+
+        Text(
+            text = securityQuestion,
+            color = Color(0xFF1E3A5F),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = {
+                    securityQuestion = securityQuestions
+                        .filter { it != securityQuestion }
+                        .random(Random(System.currentTimeMillis()))
+                },
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF86A9F0),
+                    contentColor = Color.White
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Cambiar pregunta")
+            }
+        }
+
+        Spacer(Modifier.height(10.dp))
+
+        OutlinedTextField(
+            value = securityAnswer,
+            onValueChange = { securityAnswer = it },
+            label = { Text("Respuesta de seguridad") },
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
         Spacer(Modifier.height(18.dp))
 
         if (errorMessage != null) {
@@ -111,7 +172,9 @@ fun RegisterCard(
                     username = nickname,
                     age = age.toIntOrNull() ?: 0,
                     avatarId = 1,
-                    password = password
+                    password = password,
+                    securityQuestion = securityQuestion,
+                    securityAnswer = securityAnswer
                 )
                 onRegister(profile)
             },

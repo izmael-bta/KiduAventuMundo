@@ -7,5 +7,7 @@ data class User(
     val nickname: String,
     val passwordHash: String = "",
     val avatarId: String,
+    val securityQuestion: String,
+    val securityAnswerHash: String,
     val stars: Int = 0
 )

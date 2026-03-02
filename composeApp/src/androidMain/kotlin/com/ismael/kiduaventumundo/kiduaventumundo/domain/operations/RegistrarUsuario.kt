@@ -15,6 +15,14 @@ class RegistrarUsuario(
             return RegisterResult.Error("La contrasena debe tener al menos 6 caracteres.")
         }
 
+        if (profile.securityQuestion.isBlank()) {
+            return RegisterResult.Error("Selecciona una pregunta de seguridad.")
+        }
+
+        if (profile.securityAnswer.trim().length < 2) {
+            return RegisterResult.Error("La respuesta de seguridad debe tener al menos 2 caracteres.")
+        }
+
         if (repository.nicknameExists(profile.username)) {
             return RegisterResult.Error("El nickname ya existe.")
         }
@@ -25,6 +33,8 @@ class RegistrarUsuario(
             nickname = profile.username,
             passwordHash = PasswordHasher.hash(profile.password),
             avatarId = "avatar_${profile.avatarId}",
+            securityQuestion = profile.securityQuestion.trim(),
+            securityAnswerHash = PasswordHasher.hash(profile.securityAnswer.trim().lowercase()),
             stars = 0
         )
 

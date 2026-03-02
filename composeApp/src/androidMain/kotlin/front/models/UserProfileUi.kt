@@ -5,5 +5,7 @@ data class UserProfileUi(
     val age: Int = 0,
     val username: String = "",
     val avatarId: Int = 1,
-    val password: String = ""
+    val password: String = "",
+    val securityQuestion: String = "",
+    val securityAnswer: String = ""
 )

@@ -47,6 +47,7 @@ import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.LoginService
 @Composable
 fun LoginScreen(
     onGoRegister: () -> Unit,
+    onGoForgotPassword: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
     val context = LocalContext.current
@@ -182,6 +183,12 @@ fun LoginScreen(
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
+
+                TextButton(onClick = onGoForgotPassword, enabled = !isLoading) {
+                    Text("Olvidaste tu contrasena?")
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
 
                 TextButton(onClick = onGoRegister, enabled = !isLoading) {
                     Text("No tienes cuenta? Registrate")

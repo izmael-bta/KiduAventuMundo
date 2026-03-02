@@ -81,11 +81,19 @@ fun AndroidApp() {
         composable(Routes.LOGIN) {
             LoginScreen(
                 onGoRegister = { navController.navigate(Routes.REGISTER) },
+                onGoForgotPassword = { navController.navigate(Routes.FORGOT_PASSWORD) },
                 onLoginSuccess = {
                     navController.navigate(Routes.MENU) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
                 }
+            )
+        }
+
+        // ---------------- FORGOT PASSWORD ----------------
+        composable(Routes.FORGOT_PASSWORD) {
+            ForgotPasswordScreen(
+                onBackToLogin = { navController.popBackStack() }
             )
         }
 

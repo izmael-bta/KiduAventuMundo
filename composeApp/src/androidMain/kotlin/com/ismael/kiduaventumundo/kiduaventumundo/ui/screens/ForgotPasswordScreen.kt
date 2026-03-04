@@ -176,7 +176,7 @@ fun ForgotPasswordScreen(
                             ) {
                                 is PasswordResetResult.Success -> {
                                     error = null
-                                    success = "Contrasena actualizada. Ya puedes iniciar sesion."
+                                    success = "Contraseña actualizada. Ya puedes iniciar sesión."
                                     securityAnswer = ""
                                     newPassword = ""
                                 }
@@ -218,7 +218,7 @@ fun ForgotPasswordScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("Volver a iniciar sesion")
+                    Text("Volver a iniciar sesión")
                 }
             }
         }

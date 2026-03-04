@@ -159,7 +159,7 @@ fun ProfileScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "${profile.age} anos",
+                        text = "${profile.age} años",
                         fontSize = 14.sp,
                         color = Color(0xFF61788F)
                     )
@@ -277,7 +277,7 @@ fun ProfileScreen(
                 ),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
             ) {
-                Text(text = "Cerrar sesion", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text(text = "Cerrar sesión", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             }
 
             Spacer(modifier = Modifier.height(24.dp))

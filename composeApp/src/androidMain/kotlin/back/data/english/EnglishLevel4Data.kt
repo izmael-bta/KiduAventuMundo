@@ -3,6 +3,9 @@ package com.ismael.kiduaventumundo.kiduaventumundo.back.data.english
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.QuizOption
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.QuizQuestion
 
+/**
+ * Banco de preguntas del nivel 4 (sonidos).
+ */
 object EnglishLevel4Data {
     fun questions(): List<QuizQuestion> = listOf(
         QuizQuestion("Which sound says: MEOW?", "Select the matching sound", "meow", listOf(

@@ -3,6 +3,9 @@ package com.ismael.kiduaventumundo.kiduaventumundo.back.data.english
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.QuizOption
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.QuizQuestion
 
+/**
+ * Banco de preguntas del nivel 5 (colores + objetos).
+ */
 object EnglishLevel5Data {
     fun questions(): List<QuizQuestion> = listOf(
         QuizQuestion("Select: GREEN BALL", "Choose the correct combination", "green_ball", listOf(

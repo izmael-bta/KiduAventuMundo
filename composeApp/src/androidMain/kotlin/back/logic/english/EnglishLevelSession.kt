@@ -2,6 +2,9 @@ package com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english
 
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
 
+/**
+ * Estado de ejecucion de un nivel durante una sesion de juego.
+ */
 data class LevelSessionState(
     val index: Int,
     val starsLevel: Int,
@@ -14,21 +17,32 @@ data class LevelSessionState(
     val passStars: Int
 )
 
+/**
+ * Resultado de seleccionar una opcion.
+ */
 data class SelectionResult(
     val state: LevelSessionState,
     val isCorrect: Boolean
 )
 
+/**
+ * Accion final tras confirmar dialogo de cierre de nivel.
+ */
 enum class DialogConfirmAction {
     CONTINUE,
     RETRY
 }
 
+/**
+ * Orquesta la logica de juego de un nivel:
+ * intentos, estrellas, avance, finalizacion y desbloqueo.
+ */
 class EnglishLevelSession(
     private val level: Int,
     private val totalActivities: Int,
     private val passStars: Int = 13
 ) {
+    private var nextLevelAfterCompletion: Int? = null
     private val activityStars = EnglishManager
         .getActivityStars(level = level, totalActivities = totalActivities)
         .toMutableList()
@@ -46,6 +60,9 @@ class EnglishLevelSession(
     )
     val state: LevelSessionState get() = _state
 
+    /**
+     * Procesa la opcion seleccionada y actualiza estrellas/feedback.
+     */
     fun submitSelection(selectedId: String, correctId: String): SelectionResult {
         if (_state.locked || _state.showEndDialog) {
             return SelectionResult(_state, isCorrect = false)
@@ -77,6 +94,9 @@ class EnglishLevelSession(
         return SelectionResult(_state, isCorrect = true)
     }
 
+    /**
+     * Avanza a la siguiente actividad o abre dialogo final si ya termino.
+     */
     fun advanceAfterCorrect(): LevelSessionState {
         if (!_state.locked) return _state
 
@@ -97,6 +117,9 @@ class EnglishLevelSession(
         return _state
     }
 
+    /**
+     * Reinicia la sesion de nivel conservando progreso previo ya guardado.
+     */
     fun restartLevel(): LevelSessionState {
         _state = _state.copy(
             index = 0,
@@ -115,15 +138,33 @@ class EnglishLevelSession(
         return _state
     }
 
+    /**
+     * Confirma resultado final:
+     * - si aprobo, marca nivel completado y desbloquea siguiente
+     * - si no aprobo, reinicia sesion de nivel
+     */
     fun confirmDialog(): DialogConfirmAction {
         return if (_state.passed) {
-            EnglishManager.completeLevel(level = level, starsEarned = _state.starsLevel)
+            nextLevelAfterCompletion = EnglishManager.completeLevelAndGetNext(
+                level = level,
+                starsEarned = _state.starsLevel
+            )
             _state = _state.copy(showEndDialog = false)
             DialogConfirmAction.CONTINUE
         } else {
             restartLevel()
             DialogConfirmAction.RETRY
         }
+    }
+
+    /**
+     * Devuelve el siguiente nivel calculado al confirmar nivel aprobado.
+     * Se consume una sola vez para evitar reuso accidental.
+     */
+    fun consumeNextLevelAfterCompletion(): Int? {
+        val nextLevel = nextLevelAfterCompletion
+        nextLevelAfterCompletion = null
+        return nextLevel
     }
 
     private fun earnedStarsForThisActivity(mistakes: Int): Int = when {

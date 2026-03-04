@@ -2,14 +2,25 @@ package com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth
 
 import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
 
+/**
+ * Resultado del intento de inicio de sesion.
+ */
 sealed class LoginResult {
     data object Success : LoginResult()
     data class Error(val message: String) : LoginResult()
 }
 
+/**
+ * Caso de uso de autenticacion.
+ *
+ * Valida credenciales y registra sesion activa en DB local.
+ */
 class LoginService(
     private val db: AppDatabaseHelper
 ) {
+    /**
+     * Ejecuta login por nickname/password.
+     */
     fun login(nickname: String, password: String): LoginResult {
         val nick = nickname.trim()
         val pass = password
@@ -19,7 +30,7 @@ class LoginService(
         }
 
         if (pass.isBlank()) {
-            return LoginResult.Error("Ingresa tu contrasena.")
+            return LoginResult.Error("Ingresa tu contraseña.")
         }
 
         val user = db.getUserByNickname(nick)
@@ -27,7 +38,7 @@ class LoginService(
 
         val passwordHash = PasswordHasher.hash(pass)
         if (user.passwordHash != passwordHash) {
-            return LoginResult.Error("Contrasena incorrecta.")
+            return LoginResult.Error("Contraseña incorrecta.")
         }
 
         db.setSession(user.id)

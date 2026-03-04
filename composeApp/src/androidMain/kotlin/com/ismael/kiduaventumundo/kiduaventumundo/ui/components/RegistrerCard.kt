@@ -103,7 +103,7 @@ fun RegisterCard(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Contrasena") },
+            label = { Text("Contraseña") },
             shape = RoundedCornerShape(14.dp),
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),

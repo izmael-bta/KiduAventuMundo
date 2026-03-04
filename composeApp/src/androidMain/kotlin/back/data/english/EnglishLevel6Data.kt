@@ -3,6 +3,9 @@ package com.ismael.kiduaventumundo.kiduaventumundo.back.data.english
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.QuizOption
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.QuizQuestion
 
+/**
+ * Banco de preguntas del nivel 6 (animales + sonidos).
+ */
 object EnglishLevel6Data {
     fun questions(): List<QuizQuestion> = listOf(
         QuizQuestion("CAT says...", "Match animal with sound", "meow", listOf(

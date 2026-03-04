@@ -32,11 +32,17 @@ import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * Opcion generica para niveles tipo quiz.
+ */
 data class QuizOption(
     val id: String,
     val label: String
 )
 
+/**
+ * Pregunta generica para niveles tipo quiz.
+ */
 data class QuizQuestion(
     val prompt: String,
     val hint: String,
@@ -44,6 +50,11 @@ data class QuizQuestion(
     val options: List<QuizOption>
 )
 
+/**
+ * Plantilla reutilizable de UI+logica para niveles de quiz.
+ *
+ * Nota: esta funcion vive en back por estructura actual del proyecto.
+ */
 @Composable
 fun EnglishQuizLevelScreen(
     levelNumber: Int,
@@ -51,7 +62,7 @@ fun EnglishQuizLevelScreen(
     unlockMessage: String,
     questionsSource: List<QuizQuestion>,
     onBack: () -> Unit,
-    onFinished: () -> Unit
+    onFinished: (Int?) -> Unit
 ) {
     val passStars = 13
     val questions = remember { questionsSource }
@@ -80,6 +91,7 @@ fun EnglishQuizLevelScreen(
 
     val current = questions[index]
 
+    // Reglas de puntuacion por actividad segun errores acumulados.
     fun earnedStarsForThisActivity(m: Int): Int = when {
         m == 0 -> 3
         m == 1 -> 2
@@ -87,6 +99,7 @@ fun EnglishQuizLevelScreen(
         else -> 0
     }
 
+    // Reinicio de flujo local de nivel (sin perder mejores estrellas ya registradas).
     fun restartLevel() {
         index = 0
         starsLevel = activityStars.sumOf { it ?: 0 }
@@ -203,9 +216,12 @@ fun EnglishQuizLevelScreen(
             confirmButton = {
                 if (passed) {
                     Button(onClick = {
-                        EnglishManager.completeLevel(level = levelNumber, starsEarned = starsLevel)
+                        val nextLevel = EnglishManager.completeLevelAndGetNext(
+                            level = levelNumber,
+                            starsEarned = starsLevel
+                        )
                         showEndDialog = false
-                        onFinished()
+                        onFinished(nextLevel)
                     }) {
                         Text("Continuar")
                     }

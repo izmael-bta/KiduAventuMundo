@@ -3,6 +3,9 @@ package com.ismael.kiduaventumundo.kiduaventumundo.back.data.english
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.QuizOption
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.QuizQuestion
 
+/**
+ * Banco de preguntas del nivel 3 (animales).
+ */
 object EnglishLevel3Data {
     fun questions(): List<QuizQuestion> = listOf(
         QuizQuestion("Select: CAT", "Tap the correct animal", "cat", listOf(

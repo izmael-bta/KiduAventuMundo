@@ -6,6 +6,13 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.model.User
 
+/**
+ * Helper de SQLite local.
+ *
+ * Mantiene:
+ * - usuarios y sesion
+ * - progreso de niveles y actividades de Ingles
+ */
 class AppDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -15,6 +22,7 @@ class AppDatabaseHelper(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        // Migracion incremental: agrega tablas de progreso desde version 5.
         if (oldVersion < 5) {
             createBaseTables(db)
             createEnglishProgressTables(db)
@@ -236,6 +244,7 @@ class AppDatabaseHelper(context: Context) :
         val db = writableDatabase
         db.beginTransaction()
         try {
+            // Reemplazo total por nivel para mantener consistencia del snapshot.
             db.delete(
                 TABLE_ENGLISH_ACTIVITY_PROGRESS,
                 "$COL_ACTIVITY_USER_ID = ? AND $COL_ACTIVITY_LEVEL = ?",

@@ -113,7 +113,7 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Iniciar sesion",
+                    text = "Iniciar sesión",
                     fontSize = 26.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF1E3A5F)
@@ -140,7 +140,7 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Contrasena") },
+                    label = { Text("Contraseña") },
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
@@ -185,13 +185,13 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 TextButton(onClick = onGoForgotPassword, enabled = !isLoading) {
-                    Text("Olvidaste tu contrasena?")
+                    Text("¿Olvidaste tu contraseña?")
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 TextButton(onClick = onGoRegister, enabled = !isLoading) {
-                    Text("No tienes cuenta? Registrate")
+                    Text("¿No tienes cuenta? Regístrate")
                 }
             }
         }

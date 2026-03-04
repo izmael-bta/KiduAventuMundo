@@ -7,11 +7,11 @@ import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.EnglishQuiz
 @Composable
 fun EnglishLevel8Screen(
     onBack: () -> Unit,
-    onFinished: () -> Unit
+    onFinished: (Int?) -> Unit
 ) {
     EnglishQuizLevelScreen(
         levelNumber = 8,
-        levelTitle = "Desafio final",
+        levelTitle = "Desafío final",
         unlockMessage = "Has completado todos los niveles.",
         questionsSource = EnglishLevel8Data.questions(),
         onBack = onBack,

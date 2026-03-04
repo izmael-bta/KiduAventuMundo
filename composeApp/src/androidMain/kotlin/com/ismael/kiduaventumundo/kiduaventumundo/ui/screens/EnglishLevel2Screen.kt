@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun EnglishLevel2Screen(
     onBack: () -> Unit,
-    onFinished: () -> Unit
+    onFinished: (Int?) -> Unit
 ) {
     val questions = remember { EnglishLevel2Data.questions() }
     val session = remember { EnglishLevelSession(level = 2, totalActivities = questions.size) }
@@ -141,7 +141,9 @@ fun EnglishLevel2Screen(
                     Button(onClick = {
                         val action = session.confirmDialog()
                         state.value = session.state
-                        if (action == DialogConfirmAction.CONTINUE) onFinished()
+                        if (action == DialogConfirmAction.CONTINUE) {
+                            onFinished(session.consumeNextLevelAfterCompletion())
+                        }
                     }) {
                         Text("Continuar")
                     }

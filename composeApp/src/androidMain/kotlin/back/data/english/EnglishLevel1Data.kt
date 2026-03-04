@@ -4,6 +4,9 @@ import androidx.compose.ui.graphics.Color
 import com.ismael.kiduaventumundo.kiduaventumundo.back.model.english.ColorOption
 import com.ismael.kiduaventumundo.kiduaventumundo.back.model.english.ColorQuestion
 
+/**
+ * Banco de preguntas del nivel 1 (colores).
+ */
 object EnglishLevel1Data {
 
     private val RED = ColorOption("red", "RED", Color(0xFFE53935))

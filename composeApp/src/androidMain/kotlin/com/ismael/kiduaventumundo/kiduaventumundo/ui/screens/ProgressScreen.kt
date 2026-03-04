@@ -15,6 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Pantalla solo de presentacion.
+ * Recibe datos ya calculados desde back (sin reglas de negocio internas).
+ */
 @Composable
 fun ProgressScreen(
     totalStars: Int,

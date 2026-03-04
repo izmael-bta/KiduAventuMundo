@@ -51,6 +51,19 @@ fun AndroidApp() {
     val context = LocalContext.current
     val db = remember { AppDatabaseHelper(context) }
     val navController = rememberNavController()
+    val onEnglishLevelFinished: (Int?) -> Unit = { nextLevel ->
+        if (nextLevel != null) {
+            navController.navigate(Routes.englishActivities(nextLevel)) {
+                popUpTo(Routes.ENGLISH) { inclusive = false }
+                launchSingleTop = true
+            }
+        } else {
+            navController.navigate(Routes.ENGLISH) {
+                popUpTo(Routes.ENGLISH) { inclusive = false }
+                launchSingleTop = true
+            }
+        }
+    }
 
     //  VIEWMODEL COMPARTIDO ENTRE MENU Y PROFILE
     val profileViewModel: ProfileViewModel = viewModel()
@@ -130,6 +143,7 @@ fun AndroidApp() {
             }
 
             LaunchedEffect(sessionUser.id) {
+                // Al abrir menu con usuario en sesion, se restaura su progreso persistido.
                 EnglishManager.bindUserSession(
                     database = db,
                     userId = sessionUser.id
@@ -211,6 +225,7 @@ fun AndroidApp() {
                     navController.popBackStack()
                 },
                 onLogout = {
+                    // Logout seguro: guardar progreso y limpiar estado en memoria.
                     EnglishManager.persistCurrentUserProgress()
                     EnglishManager.clearInMemoryProgress()
                     db.clearSession()
@@ -283,56 +298,56 @@ fun AndroidApp() {
         composable(Routes.ENGLISH_LEVEL_1) {
             EnglishLevel1Screen(
                 onBack = { navController.popBackStack() },
-                onFinished = { navController.popBackStack() }
+                onFinished = onEnglishLevelFinished
             )
         }
 
         composable(Routes.ENGLISH_LEVEL_2) {
             EnglishLevel2Screen(
                 onBack = { navController.popBackStack() },
-                onFinished = { navController.popBackStack() }
+                onFinished = onEnglishLevelFinished
             )
         }
 
         composable(Routes.ENGLISH_LEVEL_3) {
             EnglishLevel3Screen(
                 onBack = { navController.popBackStack() },
-                onFinished = { navController.popBackStack() }
+                onFinished = onEnglishLevelFinished
             )
         }
 
         composable(Routes.ENGLISH_LEVEL_4) {
             EnglishLevel4Screen(
                 onBack = { navController.popBackStack() },
-                onFinished = { navController.popBackStack() }
+                onFinished = onEnglishLevelFinished
             )
         }
 
         composable(Routes.ENGLISH_LEVEL_5) {
             EnglishLevel5Screen(
                 onBack = { navController.popBackStack() },
-                onFinished = { navController.popBackStack() }
+                onFinished = onEnglishLevelFinished
             )
         }
 
         composable(Routes.ENGLISH_LEVEL_6) {
             EnglishLevel6Screen(
                 onBack = { navController.popBackStack() },
-                onFinished = { navController.popBackStack() }
+                onFinished = onEnglishLevelFinished
             )
         }
 
         composable(Routes.ENGLISH_LEVEL_7) {
             EnglishLevel7Screen(
                 onBack = { navController.popBackStack() },
-                onFinished = { navController.popBackStack() }
+                onFinished = onEnglishLevelFinished
             )
         }
 
         composable(Routes.ENGLISH_LEVEL_8) {
             EnglishLevel8Screen(
                 onBack = { navController.popBackStack() },
-                onFinished = { navController.popBackStack() }
+                onFinished = onEnglishLevelFinished
             )
         }
     }

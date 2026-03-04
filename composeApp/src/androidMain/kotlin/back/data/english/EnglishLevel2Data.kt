@@ -1,17 +1,26 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.back.data.english
 
+/**
+ * Opcion de respuesta para preguntas de objetos.
+ */
 data class ObjectOption(
     val id: String,
     val labelEn: String,
     val emoji: String
 )
 
+/**
+ * Pregunta base para el nivel de objetos.
+ */
 data class ObjectQuestion(
     val promptEn: String,
     val correctId: String,
     val options: List<ObjectOption>
 )
 
+/**
+ * Banco de preguntas del nivel 2 (objetos).
+ */
 object EnglishLevel2Data {
 
     private val APPLE = ObjectOption("apple", "APPLE", "\uD83C\uDF4E")

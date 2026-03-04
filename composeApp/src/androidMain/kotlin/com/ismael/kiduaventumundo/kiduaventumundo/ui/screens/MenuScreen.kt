@@ -114,7 +114,7 @@ fun MenuScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A7CDB))
             ) {
                 Text(
-                    text = "Ingles",
+                    text = "Inglés",
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White
                 )

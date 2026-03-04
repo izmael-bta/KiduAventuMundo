@@ -13,6 +13,14 @@ import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.EnglishLevel
 import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
 import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.EnglishLevel
 
+/**
+ * Manager central del progreso de Ingles.
+ *
+ * Responsabilidades:
+ * - Mantener estado en memoria para la UI.
+ * - Cargar/guardar progreso por usuario en SQLite.
+ * - Exponer un resumen simple para pantallas de progreso.
+ */
 object EnglishManager {
 
     val stars = mutableStateOf(0)
@@ -36,7 +44,7 @@ object EnglishManager {
         EnglishLevel(5, "Colores + Objetos", "Combina lo aprendido", false, false),
         EnglishLevel(6, "Animales + Sonidos", "Relaciona el sonido", false, false),
         EnglishLevel(7, "Mixto", "Repaso general", false, false),
-        EnglishLevel(8, "Desafio final", "Racha de aciertos", false, false)
+        EnglishLevel(8, "Desafío final", "Racha de aciertos", false, false)
     )
 
     fun getLevels(): List<EnglishLevel> = levels
@@ -48,6 +56,10 @@ object EnglishManager {
         val unlockedLevels: Int
     )
 
+    /**
+     * Vincula una sesion de usuario y carga su progreso persistido.
+     * Si ya estaba vinculado el mismo usuario, evita recarga innecesaria.
+     */
     fun bindUserSession(database: AppDatabaseHelper, userId: Long) {
         db = database
         if (activeUserId == userId) return
@@ -55,10 +67,18 @@ object EnglishManager {
         loadProgressFromDatabase()
     }
 
+    /**
+     * Fuerza persistencia del estado actual.
+     * Util cuando se hace logout o transiciones sensibles.
+     */
     fun persistCurrentUserProgress() {
         persistProgressToDatabase()
     }
 
+    /**
+     * Limpia estado en memoria del usuario actual.
+     * No borra datos persistidos.
+     */
     fun clearInMemoryProgress() {
         activeUserId = null
         resetInMemoryProgress()
@@ -83,6 +103,7 @@ object EnglishManager {
 
         val previous = activityStars[activityIndex] ?: -1
         if (earned > previous) {
+            // Solo se suma la mejora neta para no duplicar estrellas al repetir actividad.
             val delta = earned - maxOf(previous, 0)
             stars.value += delta
             activityStars[activityIndex] = earned
@@ -118,9 +139,30 @@ object EnglishManager {
             levels[index + 1] = next.copy(isUnlocked = true)
         }
 
+        // Guardado inmediato para no perder desbloqueos/completados al cerrar app.
         persistProgressToDatabase()
     }
 
+    /**
+     * Completa el nivel y devuelve el siguiente nivel jugable, si existe.
+     */
+    fun completeLevelAndGetNext(level: Int, starsEarned: Int): Int? {
+        completeLevel(level = level, starsEarned = starsEarned)
+        return getNextPlayableLevel(level)
+    }
+
+    /**
+     * Devuelve el siguiente nivel desbloqueado despues del nivel actual.
+     * Retorna null si no hay siguiente nivel (fin de contenido).
+     */
+    fun getNextPlayableLevel(currentLevel: Int): Int? {
+        val nextLevelNumber = currentLevel + 1
+        return levels.firstOrNull { it.level == nextLevelNumber && it.isUnlocked }?.level
+    }
+
+    /**
+     * Entrega datos listos para UI de Progreso, evitando logica de negocio en composables.
+     */
     fun getProgressSummary(): ProgressSummary {
         val currentLevels = getLevels()
         val currentLevel = currentLevels.firstOrNull { it.isUnlocked && !it.isCompleted }?.level
@@ -163,6 +205,9 @@ object EnglishManager {
         levels.addAll(defaultLevels())
     }
 
+    /**
+     * Restaura estado de progreso del usuario actual desde SQLite.
+     */
     private fun loadProgressFromDatabase() {
         val database = db ?: return
         val userId = activeUserId ?: return
@@ -187,6 +232,10 @@ object EnglishManager {
         }
     }
 
+    /**
+     * Persiste estado completo de progreso para mantener coherencia:
+     * estrellas globales, niveles y estrellas por actividad.
+     */
     private fun persistProgressToDatabase() {
         val database = db ?: return
         val userId = activeUserId ?: return

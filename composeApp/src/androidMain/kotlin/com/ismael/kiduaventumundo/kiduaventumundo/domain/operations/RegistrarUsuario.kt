@@ -12,7 +12,7 @@ class RegistrarUsuario(
 
     operator fun invoke(profile: UserProfileUi): RegisterResult {
         if (profile.password.length < 6) {
-            return RegisterResult.Error("La contrasena debe tener al menos 6 caracteres.")
+            return RegisterResult.Error("La contraseña debe tener al menos 6 caracteres.")
         }
 
         if (profile.securityQuestion.isBlank()) {

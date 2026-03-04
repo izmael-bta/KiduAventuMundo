@@ -3,6 +3,9 @@ package com.ismael.kiduaventumundo.kiduaventumundo.back.data.english
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.QuizOption
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.QuizQuestion
 
+/**
+ * Banco de preguntas del nivel 7 (mixto / repaso general).
+ */
 object EnglishLevel7Data {
     fun questions(): List<QuizQuestion> = listOf(
         QuizQuestion("Select the color: BLUE", "Mixed review", "blue", listOf(

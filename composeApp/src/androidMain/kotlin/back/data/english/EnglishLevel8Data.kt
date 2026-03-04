@@ -3,6 +3,9 @@ package com.ismael.kiduaventumundo.kiduaventumundo.back.data.english
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.QuizOption
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.QuizQuestion
 
+/**
+ * Banco de preguntas del nivel 8 (desafio final).
+ */
 object EnglishLevel8Data {
     fun questions(): List<QuizQuestion> = listOf(
         QuizQuestion("Final: select PURPLE", "Final challenge", "purple", listOf(

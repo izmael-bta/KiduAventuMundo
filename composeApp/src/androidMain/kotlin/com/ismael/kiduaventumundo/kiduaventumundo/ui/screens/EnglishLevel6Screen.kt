@@ -7,7 +7,7 @@ import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.EnglishQuiz
 @Composable
 fun EnglishLevel6Screen(
     onBack: () -> Unit,
-    onFinished: () -> Unit
+    onFinished: (Int?) -> Unit
 ) {
     EnglishQuizLevelScreen(
         levelNumber = 6,

@@ -74,7 +74,7 @@ fun ForgotPasswordScreen(
                     .padding(20.dp)
             ) {
                 Text(
-                    text = "Recuperar contrasena",
+                    text = "Recuperar contraseña",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF1E3A5F)
@@ -156,7 +156,7 @@ fun ForgotPasswordScreen(
                             newPassword = it
                             error = null
                         },
-                        label = { Text("Nueva contrasena") },
+                        label = { Text("Nueva contraseña") },
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
@@ -193,7 +193,7 @@ fun ForgotPasswordScreen(
                             contentColor = Color.White
                         )
                     ) {
-                        Text("Cambiar contrasena")
+                        Text("Cambiar contraseña")
                     }
                 }
 

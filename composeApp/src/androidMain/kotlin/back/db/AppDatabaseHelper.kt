@@ -10,37 +10,15 @@ class AppDatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL(
-            """
-            CREATE TABLE $TABLE_USERS (
-                $COL_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                $COL_NAME TEXT NOT NULL,
-                $COL_AGE INTEGER NOT NULL,
-                $COL_NICKNAME TEXT NOT NULL UNIQUE,
-                $COL_PASSWORD_HASH TEXT NOT NULL,
-                $COL_AVATAR_ID TEXT NOT NULL,
-                $COL_SECURITY_QUESTION TEXT NOT NULL,
-                $COL_SECURITY_ANSWER_HASH TEXT NOT NULL,
-                $COL_STARS INTEGER NOT NULL DEFAULT 0
-            )
-            """.trimIndent()
-        )
-
-        db.execSQL(
-            """
-            CREATE TABLE $TABLE_SESSION (
-                $COL_SESSION_ID INTEGER PRIMARY KEY,
-                $COL_SESSION_USER_ID INTEGER,
-                FOREIGN KEY($COL_SESSION_USER_ID) REFERENCES $TABLE_USERS($COL_ID)
-            )
-            """.trimIndent()
-        )
+        createBaseTables(db)
+        createEnglishProgressTables(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_SESSION")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_USERS")
-        onCreate(db)
+        if (oldVersion < 5) {
+            createBaseTables(db)
+            createEnglishProgressTables(db)
+        }
     }
 
     // -------------------------
@@ -160,6 +138,126 @@ class AppDatabaseHelper(context: Context) :
         ) > 0
     }
 
+    fun updateUserStars(userId: Long, stars: Int): Boolean {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COL_STARS, stars.coerceAtLeast(0))
+        }
+        return db.update(
+            TABLE_USERS,
+            values,
+            "$COL_ID = ?",
+            arrayOf(userId.toString())
+        ) > 0
+    }
+
+    // -------------------------
+    // ENGLISH PROGRESS
+    // -------------------------
+
+    data class LevelProgressRow(
+        val level: Int,
+        val isUnlocked: Boolean,
+        val isCompleted: Boolean
+    )
+
+    fun getEnglishLevelProgress(userId: Long): List<LevelProgressRow> {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            """
+            SELECT $COL_PROGRESS_LEVEL, $COL_PROGRESS_IS_UNLOCKED, $COL_PROGRESS_IS_COMPLETED
+            FROM $TABLE_ENGLISH_LEVEL_PROGRESS
+            WHERE $COL_PROGRESS_USER_ID = ?
+            ORDER BY $COL_PROGRESS_LEVEL ASC
+            """.trimIndent(),
+            arrayOf(userId.toString())
+        )
+        cursor.use {
+            val rows = mutableListOf<LevelProgressRow>()
+            while (it.moveToNext()) {
+                rows.add(
+                    LevelProgressRow(
+                        level = it.getInt(0),
+                        isUnlocked = it.getInt(1) == 1,
+                        isCompleted = it.getInt(2) == 1
+                    )
+                )
+            }
+            return rows
+        }
+    }
+
+    fun upsertEnglishLevelProgress(
+        userId: Long,
+        level: Int,
+        isUnlocked: Boolean,
+        isCompleted: Boolean
+    ) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COL_PROGRESS_USER_ID, userId)
+            put(COL_PROGRESS_LEVEL, level)
+            put(COL_PROGRESS_IS_UNLOCKED, if (isUnlocked) 1 else 0)
+            put(COL_PROGRESS_IS_COMPLETED, if (isCompleted) 1 else 0)
+        }
+        db.insertWithOnConflict(
+            TABLE_ENGLISH_LEVEL_PROGRESS,
+            null,
+            values,
+            SQLiteDatabase.CONFLICT_REPLACE
+        )
+    }
+
+    fun getEnglishActivityStars(userId: Long, level: Int, totalActivities: Int): List<Int?> {
+        val result = MutableList(totalActivities) { null as Int? }
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            """
+            SELECT $COL_ACTIVITY_INDEX, $COL_ACTIVITY_STARS
+            FROM $TABLE_ENGLISH_ACTIVITY_PROGRESS
+            WHERE $COL_ACTIVITY_USER_ID = ? AND $COL_ACTIVITY_LEVEL = ?
+            ORDER BY $COL_ACTIVITY_INDEX ASC
+            """.trimIndent(),
+            arrayOf(userId.toString(), level.toString())
+        )
+        cursor.use {
+            while (it.moveToNext()) {
+                val index = it.getInt(0)
+                val stars = it.getInt(1)
+                if (index in result.indices) {
+                    result[index] = stars
+                }
+            }
+        }
+        return result
+    }
+
+    fun replaceEnglishActivityStars(userId: Long, level: Int, starsByActivity: List<Int?>) {
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            db.delete(
+                TABLE_ENGLISH_ACTIVITY_PROGRESS,
+                "$COL_ACTIVITY_USER_ID = ? AND $COL_ACTIVITY_LEVEL = ?",
+                arrayOf(userId.toString(), level.toString())
+            )
+            starsByActivity.forEachIndexed { index, stars ->
+                if (stars != null) {
+                    val values = ContentValues().apply {
+                        put(COL_ACTIVITY_USER_ID, userId)
+                        put(COL_ACTIVITY_LEVEL, level)
+                        put(COL_ACTIVITY_INDEX, index)
+                        put(COL_ACTIVITY_STARS, stars.coerceIn(0, 3))
+                    }
+                    db.insert(TABLE_ENGLISH_ACTIVITY_PROGRESS, null, values)
+                }
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
     // -------------------------
     // SESSION
     // -------------------------
@@ -189,7 +287,7 @@ class AppDatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "kidu_aventumundo.db"
-        private const val DATABASE_VERSION = 4 // sube version por cambio de esquema
+        private const val DATABASE_VERSION = 5
 
         private const val TABLE_USERS = "users"
         private const val COL_ID = "id"
@@ -205,6 +303,72 @@ class AppDatabaseHelper(context: Context) :
         private const val TABLE_SESSION = "session"
         private const val COL_SESSION_ID = "id"
         private const val COL_SESSION_USER_ID = "user_id"
+
+        private const val TABLE_ENGLISH_LEVEL_PROGRESS = "english_level_progress"
+        private const val COL_PROGRESS_USER_ID = "user_id"
+        private const val COL_PROGRESS_LEVEL = "level"
+        private const val COL_PROGRESS_IS_UNLOCKED = "is_unlocked"
+        private const val COL_PROGRESS_IS_COMPLETED = "is_completed"
+
+        private const val TABLE_ENGLISH_ACTIVITY_PROGRESS = "english_activity_progress"
+        private const val COL_ACTIVITY_USER_ID = "user_id"
+        private const val COL_ACTIVITY_LEVEL = "level"
+        private const val COL_ACTIVITY_INDEX = "activity_index"
+        private const val COL_ACTIVITY_STARS = "stars"
+    }
+
+    private fun createBaseTables(db: SQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS $TABLE_USERS (
+                $COL_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $COL_NAME TEXT NOT NULL,
+                $COL_AGE INTEGER NOT NULL,
+                $COL_NICKNAME TEXT NOT NULL UNIQUE,
+                $COL_PASSWORD_HASH TEXT NOT NULL,
+                $COL_AVATAR_ID TEXT NOT NULL,
+                $COL_SECURITY_QUESTION TEXT NOT NULL,
+                $COL_SECURITY_ANSWER_HASH TEXT NOT NULL,
+                $COL_STARS INTEGER NOT NULL DEFAULT 0
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS $TABLE_SESSION (
+                $COL_SESSION_ID INTEGER PRIMARY KEY,
+                $COL_SESSION_USER_ID INTEGER,
+                FOREIGN KEY($COL_SESSION_USER_ID) REFERENCES $TABLE_USERS($COL_ID)
+            )
+            """.trimIndent()
+        )
+    }
+
+    private fun createEnglishProgressTables(db: SQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS $TABLE_ENGLISH_LEVEL_PROGRESS (
+                $COL_PROGRESS_USER_ID INTEGER NOT NULL,
+                $COL_PROGRESS_LEVEL INTEGER NOT NULL,
+                $COL_PROGRESS_IS_UNLOCKED INTEGER NOT NULL DEFAULT 0,
+                $COL_PROGRESS_IS_COMPLETED INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY ($COL_PROGRESS_USER_ID, $COL_PROGRESS_LEVEL),
+                FOREIGN KEY($COL_PROGRESS_USER_ID) REFERENCES $TABLE_USERS($COL_ID)
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS $TABLE_ENGLISH_ACTIVITY_PROGRESS (
+                $COL_ACTIVITY_USER_ID INTEGER NOT NULL,
+                $COL_ACTIVITY_LEVEL INTEGER NOT NULL,
+                $COL_ACTIVITY_INDEX INTEGER NOT NULL,
+                $COL_ACTIVITY_STARS INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY ($COL_ACTIVITY_USER_ID, $COL_ACTIVITY_LEVEL, $COL_ACTIVITY_INDEX),
+                FOREIGN KEY($COL_ACTIVITY_USER_ID) REFERENCES $TABLE_USERS($COL_ID)
+            )
+            """.trimIndent()
+        )
     }
 }
 

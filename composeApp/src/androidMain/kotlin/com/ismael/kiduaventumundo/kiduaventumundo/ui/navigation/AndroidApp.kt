@@ -121,6 +121,7 @@ fun AndroidApp() {
 
             if (sessionUser == null) {
                 LaunchedEffect(Unit) {
+                    EnglishManager.clearInMemoryProgress()
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.MENU) { inclusive = true }
                     }
@@ -128,12 +129,33 @@ fun AndroidApp() {
                 return@composable
             }
 
+            LaunchedEffect(sessionUser.id) {
+                EnglishManager.bindUserSession(
+                    database = db,
+                    userId = sessionUser.id
+                )
+            }
+
             MenuScreen(
                 nickname = sessionUser.nickname,
                 starsCount = EnglishManager.stars.value,
                 profileViewModel = profileViewModel,
                 onGoEnglish = { navController.navigate(Routes.ENGLISH) },
+                onGoProgress = { navController.navigate(Routes.PROGRESS) },
                 onGoProfile = { navController.navigate(Routes.PROFILE) }
+            )
+        }
+
+        // ---------------- PROGRESS ----------------
+        composable(Routes.PROGRESS) {
+            val progress = EnglishManager.getProgressSummary()
+
+            ProgressScreen(
+                totalStars = progress.totalStars,
+                currentLevel = progress.currentLevel,
+                unlockedLevels = progress.unlockedLevels,
+                activitiesCompleted = progress.activitiesCompleted,
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -189,6 +211,8 @@ fun AndroidApp() {
                     navController.popBackStack()
                 },
                 onLogout = {
+                    EnglishManager.persistCurrentUserProgress()
+                    EnglishManager.clearInMemoryProgress()
                     db.clearSession()
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(0)

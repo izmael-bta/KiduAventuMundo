@@ -7,6 +7,7 @@ object Routes {
     const val LOGIN = "login"
     const val FORGOT_PASSWORD = "forgot_password"
     const val MENU = "menu"
+    const val PROGRESS = "progress"
     const val REGISTER = "register"
     const val PROFILE = "profile"
     const val ENGLISH = "english"

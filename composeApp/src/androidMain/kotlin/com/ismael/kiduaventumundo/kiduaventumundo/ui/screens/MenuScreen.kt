@@ -36,6 +36,7 @@ fun MenuScreen(
     starsCount: Int,
     profileViewModel: ProfileViewModel,
     onGoEnglish: () -> Unit,
+    onGoProgress: () -> Unit,
     onGoProfile: () -> Unit
 ) {
     val selectedAvatar = profileViewModel.selectedAvatar
@@ -114,6 +115,25 @@ fun MenuScreen(
             ) {
                 Text(
                     text = "Ingles",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = onGoProgress,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(58.dp),
+                shape = RoundedCornerShape(26.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White.copy(alpha = 0.22f)
+                )
+            ) {
+                Text(
+                    text = "Progreso",
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White
                 )

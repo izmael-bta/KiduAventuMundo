@@ -1,42 +1,35 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.datasource.repository
 
-import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.model.User
-import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.userRepository
+import com.ismael.kiduaventumundo.kiduaventumundo.data.remote.api.UserApi
+import com.ismael.kiduaventumundo.kiduaventumundo.data.remote.model.LoginResponse
+import com.ismael.kiduaventumundo.kiduaventumundo.data.remote.model.User
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.UserRepository
 
 class UserRepositoryImpl(
-    private val db: AppDatabaseHelper
-) : userRepository{
+    private val userApi: UserApi
+) : UserRepository {
 
-    override fun register(user: User): Long {
-        return db.registerUser(user)
+    override suspend fun register(user: User): User? = userApi.createUser(user)
+
+    override suspend fun getUserById(userId: Long): User? = userApi.getUserById(userId)
+
+    override suspend fun getUserByNickname(nickname: String): User? = userApi.getUserByNickname(nickname)
+
+    override suspend fun login(nickname: String, passwordHash: String): LoginResponse? {
+        return userApi.login(nickname = nickname, passwordHash = passwordHash)
     }
 
-    override fun getUserById(id: Long): User? {
-        return db.getUserById(id)
-    }
-    override fun getUserByNickname(nickname: String): User? {
-        return db.getUserByNickname(nickname)
-    }
+    override fun getLastErrorMessage(): String? = userApi.getLastErrorMessage()
 
-
-    override fun nicknameExists(nickname: String): Boolean {
-        return db.nicknameExists(nickname)
-    }
-    override fun updateUser(user: User) {
-        db.updateUser(user)
+    override suspend fun nicknameExists(nickname: String): Boolean {
+        return userApi.getUserByNickname(nickname) != null
     }
 
-
-    override fun setSession(userId: Long) {
-        db.setSession(userId)
+    override suspend fun updateAvatar(userId: Long, avatarId: String): Boolean {
+        return userApi.updateUserAvatar(userId = userId, avatarId = avatarId)
     }
 
-    override fun getSessionUserId(): Long? {
-        return db.getSessionUserId()
-    }
-
-    override fun clearSession() {
-        db.clearSession()
+    override suspend fun updatePassword(userId: Long, passwordHash: String): Boolean {
+        return userApi.updateUserPassword(userId = userId, passwordHash = passwordHash)
     }
 }

@@ -10,30 +10,46 @@ import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.EnglishLevel
 import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.EnglishLevel6Data
 import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.EnglishLevel7Data
 import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.EnglishLevel8Data
-import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
+import com.ismael.kiduaventumundo.kiduaventumundo.data.remote.model.ProgressEvent
+import com.ismael.kiduaventumundo.kiduaventumundo.data.remote.model.UserActivityProgress
+import com.ismael.kiduaventumundo.kiduaventumundo.data.remote.model.UserLevelProgress
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.EventsRepository
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.ProgressRepository
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.ReportsRepository
 import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.EnglishLevel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
-/**
- * Manager central del progreso de Ingles.
- *
- * Responsabilidades:
- * - Mantener estado en memoria para la UI.
- * - Cargar/guardar progreso por usuario en SQLite.
- * - Exponer un resumen simple para pantallas de progreso.
- */
 object EnglishManager {
 
     val stars = mutableStateOf(0)
     private val bestStarsByLevel = mutableMapOf<Int, Int>()
     private val activityBestStarsByLevel = mutableMapOf<Int, MutableList<Int?>>()
     private val nextStartActivityByLevel = mutableMapOf<Int, Int>()
-    private var db: AppDatabaseHelper? = null
-    private var activeUserId: Long? = null
 
     private val levels = mutableStateListOf<EnglishLevel>()
 
+    private var progressRepository: ProgressRepository? = null
+    private var eventsRepository: EventsRepository? = null
+    private var reportsRepository: ReportsRepository? = null
+    private var activeUserId: Long? = null
+
+    private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     init {
         resetInMemoryProgress()
+    }
+
+    fun configure(
+        progressRepository: ProgressRepository,
+        eventsRepository: EventsRepository,
+        reportsRepository: ReportsRepository
+    ) {
+        this.progressRepository = progressRepository
+        this.eventsRepository = eventsRepository
+        this.reportsRepository = reportsRepository
     }
 
     private fun defaultLevels(): List<EnglishLevel> = listOf(
@@ -44,7 +60,7 @@ object EnglishManager {
         EnglishLevel(5, "Colores + Objetos", "Combina lo aprendido", false, false),
         EnglishLevel(6, "Animales + Sonidos", "Relaciona el sonido", false, false),
         EnglishLevel(7, "Mixto", "Repaso general", false, false),
-        EnglishLevel(8, "Desafío final", "Racha de aciertos", false, false)
+        EnglishLevel(8, "Desafio final", "Racha de aciertos", false, false)
     )
 
     fun getLevels(): List<EnglishLevel> = levels
@@ -56,29 +72,16 @@ object EnglishManager {
         val unlockedLevels: Int
     )
 
-    /**
-     * Vincula una sesion de usuario y carga su progreso persistido.
-     * Si ya estaba vinculado el mismo usuario, evita recarga innecesaria.
-     */
-    fun bindUserSession(database: AppDatabaseHelper, userId: Long) {
-        db = database
+    suspend fun bindUserSession(userId: Long) {
         if (activeUserId == userId) return
         activeUserId = userId
-        loadProgressFromDatabase()
+        loadProgressFromApi()
     }
 
-    /**
-     * Fuerza persistencia del estado actual.
-     * Util cuando se hace logout o transiciones sensibles.
-     */
-    fun persistCurrentUserProgress() {
-        persistProgressToDatabase()
+    suspend fun persistCurrentUserProgress() {
+        persistProgressToApi()
     }
 
-    /**
-     * Limpia estado en memoria del usuario actual.
-     * No borra datos persistidos.
-     */
     fun clearInMemoryProgress() {
         activeUserId = null
         resetInMemoryProgress()
@@ -95,6 +98,7 @@ object EnglishManager {
     }
 
     fun recordActivityResult(level: Int, activityIndex: Int, starsEarned: Int, totalActivities: Int) {
+        val userId = activeUserId ?: return
         val earned = starsEarned.coerceIn(0, 3)
         val activityStars = activityBestStarsByLevel.getOrPut(level) {
             MutableList(totalActivities) { null }
@@ -102,12 +106,38 @@ object EnglishManager {
         if (activityIndex !in activityStars.indices) return
 
         val previous = activityStars[activityIndex] ?: -1
-        if (earned > previous) {
-            // Solo se suma la mejora neta para no duplicar estrellas al repetir actividad.
-            val delta = earned - maxOf(previous, 0)
-            stars.value += delta
-            activityStars[activityIndex] = earned
-            persistProgressToDatabase()
+        if (earned <= previous) return
+
+        val delta = earned - maxOf(previous, 0)
+        stars.value += delta
+        activityStars[activityIndex] = earned
+
+        ioScope.launch {
+            progressRepository?.upsertActivityProgress(
+                userId = userId,
+                level = level,
+                activityIndex = activityIndex,
+                progress = UserActivityProgress(
+                    userId = userId,
+                    level = level,
+                    activityIndex = activityIndex,
+                    stars = earned,
+                    attempts = 1,
+                    successes = 1,
+                    lastResult = true
+                )
+            )
+            eventsRepository?.createEvent(
+                userId = userId,
+                event = ProgressEvent(
+                    userId = userId,
+                    level = level,
+                    activityIndex = activityIndex,
+                    eventType = "activity_completed",
+                    starsDelta = delta,
+                    payloadJson = "{\"stars\":$earned}"
+                )
+            )
         }
     }
 
@@ -124,6 +154,7 @@ object EnglishManager {
     }
 
     fun completeLevel(level: Int, starsEarned: Int) {
+        val userId = activeUserId ?: return
         val index = levels.indexOfFirst { it.level == level }
         if (index == -1) return
 
@@ -139,30 +170,31 @@ object EnglishManager {
             levels[index + 1] = next.copy(isUnlocked = true)
         }
 
-        // Guardado inmediato para no perder desbloqueos/completados al cerrar app.
-        persistProgressToDatabase()
+        ioScope.launch {
+            progressRepository?.upsertLevelProgress(
+                userId = userId,
+                level = level,
+                progress = UserLevelProgress(
+                    userId = userId,
+                    level = level,
+                    isUnlocked = true,
+                    isCompleted = true,
+                    bestStars = earned
+                )
+            )
+        }
     }
 
-    /**
-     * Completa el nivel y devuelve el siguiente nivel jugable, si existe.
-     */
     fun completeLevelAndGetNext(level: Int, starsEarned: Int): Int? {
         completeLevel(level = level, starsEarned = starsEarned)
         return getNextPlayableLevel(level)
     }
 
-    /**
-     * Devuelve el siguiente nivel desbloqueado despues del nivel actual.
-     * Retorna null si no hay siguiente nivel (fin de contenido).
-     */
     fun getNextPlayableLevel(currentLevel: Int): Int? {
         val nextLevelNumber = currentLevel + 1
         return levels.firstOrNull { it.level == nextLevelNumber && it.isUnlocked }?.level
     }
 
-    /**
-     * Entrega datos listos para UI de Progreso, evitando logica de negocio en composables.
-     */
     fun getProgressSummary(): ProgressSummary {
         val currentLevels = getLevels()
         val currentLevel = currentLevels.firstOrNull { it.isUnlocked && !it.isCompleted }?.level
@@ -205,56 +237,75 @@ object EnglishManager {
         levels.addAll(defaultLevels())
     }
 
-    /**
-     * Restaura estado de progreso del usuario actual desde SQLite.
-     */
-    private fun loadProgressFromDatabase() {
-        val database = db ?: return
+    private suspend fun loadProgressFromApi() {
         val userId = activeUserId ?: return
+        val progressRepo = progressRepository ?: return
 
         resetInMemoryProgress()
 
-        stars.value = database.getUserById(userId)?.stars ?: 0
+        val summary = reportsRepository?.getSummary(userId)
+        stars.value = summary?.totalStars ?: 0
 
-        val levelProgressByLevel = database.getEnglishLevelProgress(userId).associateBy { it.level }
+        val levelProgressByLevel = progressRepo.getLevelProgress(userId).associateBy { it.level }
         levels.forEachIndexed { index, level ->
             val saved = levelProgressByLevel[level.level] ?: return@forEachIndexed
             levels[index] = level.copy(
                 isUnlocked = saved.isUnlocked,
                 isCompleted = saved.isCompleted
             )
+            bestStarsByLevel[level.level] = saved.bestStars
         }
 
         levels.forEach { level ->
             val totalActivities = totalActivitiesForLevel(level.level)
-            val savedActivityStars = database.getEnglishActivityStars(userId, level.level, totalActivities)
-            activityBestStarsByLevel[level.level] = savedActivityStars.toMutableList()
+            val savedActivityStars = MutableList(totalActivities) { null as Int? }
+            progressRepo.getActivityProgress(userId, level.level).forEach { item ->
+                val position = item.activityIndex.coerceAtLeast(0)
+                if (position in savedActivityStars.indices) {
+                    savedActivityStars[position] = item.stars
+                }
+            }
+            activityBestStarsByLevel[level.level] = savedActivityStars
         }
     }
 
-    /**
-     * Persiste estado completo de progreso para mantener coherencia:
-     * estrellas globales, niveles y estrellas por actividad.
-     */
-    private fun persistProgressToDatabase() {
-        val database = db ?: return
+    private suspend fun persistProgressToApi() {
         val userId = activeUserId ?: return
-
-        database.updateUserStars(userId = userId, stars = stars.value)
+        val progressRepo = progressRepository ?: return
 
         levels.forEach { level ->
-            database.upsertEnglishLevelProgress(
+            val levelStars = getLevelStars(level.level, totalActivitiesForLevel(level.level))
+            progressRepo.upsertLevelProgress(
                 userId = userId,
                 level = level.level,
-                isUnlocked = level.isUnlocked,
-                isCompleted = level.isCompleted
+                progress = UserLevelProgress(
+                    userId = userId,
+                    level = level.level,
+                    isUnlocked = level.isUnlocked,
+                    isCompleted = level.isCompleted,
+                    bestStars = levelStars
+                )
             )
-            val totalActivities = totalActivitiesForLevel(level.level)
-            database.replaceEnglishActivityStars(
-                userId = userId,
-                level = level.level,
-                starsByActivity = getActivityStars(level.level, totalActivities)
-            )
+
+            getActivityStars(level.level, totalActivitiesForLevel(level.level))
+                .forEachIndexed { index, star ->
+                    if (star != null) {
+                        progressRepo.upsertActivityProgress(
+                            userId = userId,
+                            level = level.level,
+                            activityIndex = index,
+                            progress = UserActivityProgress(
+                                userId = userId,
+                                level = level.level,
+                                activityIndex = index,
+                                stars = star,
+                                attempts = 1,
+                                successes = if (star > 0) 1 else 0,
+                                lastResult = star > 0
+                            )
+                        )
+                    }
+                }
         }
     }
 }

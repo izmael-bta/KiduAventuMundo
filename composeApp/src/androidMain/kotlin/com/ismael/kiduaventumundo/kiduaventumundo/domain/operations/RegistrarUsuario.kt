@@ -1,18 +1,21 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.domain.operations
 
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.model.User
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.PasswordHasher
-import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.userRepository
-import front.models.UserProfileUi
+import com.ismael.kiduaventumundo.kiduaventumundo.data.remote.model.User
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.SessionRepository
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.UserRepository
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.session.UserSession
 import com.ismael.kiduaventumundo.ui.viewmodel.RegisterResult
+import front.models.UserProfileUi
 
 class RegistrarUsuario(
-    private val repository: userRepository
+    private val repository: UserRepository,
+    private val sessionRepository: SessionRepository
 ) {
 
-    operator fun invoke(profile: UserProfileUi): RegisterResult {
+    suspend operator fun invoke(profile: UserProfileUi): RegisterResult {
         if (profile.password.length < 6) {
-            return RegisterResult.Error("La contraseña debe tener al menos 6 caracteres.")
+            return RegisterResult.Error("La contrasena debe tener al menos 6 caracteres.")
         }
 
         if (profile.securityQuestion.isBlank()) {
@@ -27,24 +30,25 @@ class RegistrarUsuario(
             return RegisterResult.Error("El nickname ya existe.")
         }
 
-        val user = User(
-            name = profile.name,
-            age = profile.age,
-            nickname = profile.username,
-            passwordHash = PasswordHasher.hash(profile.password),
-            avatarId = "avatar_${profile.avatarId}",
-            securityQuestion = profile.securityQuestion.trim(),
-            securityAnswerHash = PasswordHasher.hash(profile.securityAnswer.trim().lowercase()),
-            stars = 0
+        val createdUser = repository.register(
+            User(
+                name = profile.name,
+                age = profile.age,
+                nickname = profile.username,
+                passwordHash = PasswordHasher.hash(profile.password),
+                avatarId = "avatar_${profile.avatarId}",
+                securityQuestion = profile.securityQuestion.trim(),
+                securityAnswerHash = PasswordHasher.hash(profile.securityAnswer.trim().lowercase()),
+                stars = 0
+            )
         )
 
-        val id = repository.register(user)
-
-        return if (id != -1L) {
-            repository.setSession(id)
+        return if (createdUser != null) {
+            UserSession.setUser(createdUser)
+            sessionRepository.setSessionUserId(createdUser.id)
             RegisterResult.Success
         } else {
-            RegisterResult.Error("Error al crear usuario.")
+            RegisterResult.Error(repository.getLastErrorMessage() ?: "Error al crear usuario.")
         }
     }
 }

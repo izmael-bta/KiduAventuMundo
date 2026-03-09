@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,18 +30,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
-import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.PasswordRecoveryService
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.PasswordResetResult
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.SecurityQuestionResult
+import kotlinx.coroutines.launch
 
 @Composable
 fun ForgotPasswordScreen(
+    recoveryService: PasswordRecoveryService,
     onBackToLogin: () -> Unit
 ) {
-    val context = LocalContext.current
-    val recoveryService = remember { PasswordRecoveryService(AppDatabaseHelper(context)) }
+    val scope = rememberCoroutineScope()
 
     var nickname by remember { mutableStateOf("") }
     var securityQuestion by remember { mutableStateOf<String?>(null) }
@@ -64,9 +64,7 @@ fun ForgotPasswordScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White.copy(alpha = 0.95f)
-            )
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f))
         ) {
             Column(
                 modifier = Modifier
@@ -74,7 +72,7 @@ fun ForgotPasswordScreen(
                     .padding(20.dp)
             ) {
                 Text(
-                    text = "Recuperar contraseña",
+                    text = "Recuperar contrasena",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF1E3A5F)
@@ -99,16 +97,18 @@ fun ForgotPasswordScreen(
 
                 Button(
                     onClick = {
-                        when (val result = recoveryService.getSecurityQuestion(nickname)) {
-                            is SecurityQuestionResult.Success -> {
-                                securityQuestion = result.question
-                                error = null
-                                success = null
-                            }
-                            is SecurityQuestionResult.Error -> {
-                                securityQuestion = null
-                                error = result.message
-                                success = null
+                        scope.launch {
+                            when (val result = recoveryService.getSecurityQuestion(nickname)) {
+                                is SecurityQuestionResult.Success -> {
+                                    securityQuestion = result.question
+                                    error = null
+                                    success = null
+                                }
+                                is SecurityQuestionResult.Error -> {
+                                    securityQuestion = null
+                                    error = result.message
+                                    success = null
+                                }
                             }
                         }
                     },
@@ -129,10 +129,7 @@ fun ForgotPasswordScreen(
                         fontWeight = FontWeight.SemiBold,
                         color = Color(0xFF1E3A5F)
                     )
-                    Text(
-                        text = securityQuestion ?: "",
-                        color = Color(0xFF2F4D6F)
-                    )
+                    Text(text = securityQuestion ?: "", color = Color(0xFF2F4D6F))
 
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -156,7 +153,7 @@ fun ForgotPasswordScreen(
                             newPassword = it
                             error = null
                         },
-                        label = { Text("Nueva contraseña") },
+                        label = { Text("Nueva contrasena") },
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
@@ -167,22 +164,24 @@ fun ForgotPasswordScreen(
 
                     Button(
                         onClick = {
-                            when (
-                                val result = recoveryService.resetPassword(
-                                    nickname = nickname,
-                                    securityAnswer = securityAnswer,
-                                    newPassword = newPassword
-                                )
-                            ) {
-                                is PasswordResetResult.Success -> {
-                                    error = null
-                                    success = "Contraseña actualizada. Ya puedes iniciar sesión."
-                                    securityAnswer = ""
-                                    newPassword = ""
-                                }
-                                is PasswordResetResult.Error -> {
-                                    success = null
-                                    error = result.message
+                            scope.launch {
+                                when (
+                                    val result = recoveryService.resetPassword(
+                                        nickname = nickname,
+                                        securityAnswer = securityAnswer,
+                                        newPassword = newPassword
+                                    )
+                                ) {
+                                    is PasswordResetResult.Success -> {
+                                        error = null
+                                        success = "Contrasena actualizada. Ya puedes iniciar sesion."
+                                        securityAnswer = ""
+                                        newPassword = ""
+                                    }
+                                    is PasswordResetResult.Error -> {
+                                        success = null
+                                        error = result.message
+                                    }
                                 }
                             }
                         },
@@ -193,7 +192,7 @@ fun ForgotPasswordScreen(
                             contentColor = Color.White
                         )
                     ) {
-                        Text("Cambiar contraseña")
+                        Text("Cambiar contrasena")
                     }
                 }
 
@@ -218,7 +217,7 @@ fun ForgotPasswordScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("Volver a iniciar sesión")
+                    Text("Volver a iniciar sesion")
                 }
             }
         }

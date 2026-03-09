@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +26,7 @@ import com.ismael.kiduaventumundo.kiduaventumundo.domain.operations.RegistrarUsu
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.CloudLayer
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.FlowerLayer
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.RegisterCard
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterScreen(
@@ -32,6 +34,7 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit
 ) {
     var registerError by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -61,13 +64,15 @@ fun RegisterScreen(
                     .padding(top = 48.dp),
                 errorMessage = registerError,
                 onRegister = { profile ->
-                    when (val result = RegisterSubmitter.submit(registrarUsuario, profile)) {
-                        is RegisterSubmitResult.Success -> {
-                            registerError = null
-                            onRegisterSuccess()
-                        }
-                        is RegisterSubmitResult.Error -> {
-                            registerError = result.message
+                    scope.launch {
+                        when (val result = RegisterSubmitter.submit(registrarUsuario, profile)) {
+                            is RegisterSubmitResult.Success -> {
+                                registerError = null
+                                onRegisterSuccess()
+                            }
+                            is RegisterSubmitResult.Error -> {
+                                registerError = result.message
+                            }
                         }
                     }
                 }

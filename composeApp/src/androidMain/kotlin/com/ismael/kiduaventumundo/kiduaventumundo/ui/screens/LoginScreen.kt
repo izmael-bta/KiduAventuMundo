@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,18 +41,19 @@ import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.ismael.kiduaventumundo.kiduaventumundo.R
-import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.LoginResult
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.LoginService
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
+    loginService: LoginService,
     onGoRegister: () -> Unit,
     onGoForgotPassword: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
     val context = LocalContext.current
-    val loginService = remember { LoginService(AppDatabaseHelper(context)) }
+    val scope = rememberCoroutineScope()
 
     var nickname by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -157,15 +159,17 @@ fun LoginScreen(
                 Button(
                     onClick = {
                         isLoading = true
-                        when (val result = loginService.login(nickname, password)) {
-                            is LoginResult.Success -> {
-                                error = null
-                                isLoading = false
-                                onLoginSuccess()
-                            }
-                            is LoginResult.Error -> {
-                                error = result.message
-                                isLoading = false
+                        scope.launch {
+                            when (val result = loginService.login(nickname, password)) {
+                                is LoginResult.Success -> {
+                                    error = null
+                                    isLoading = false
+                                    onLoginSuccess()
+                                }
+                                is LoginResult.Error -> {
+                                    error = result.message
+                                    isLoading = false
+                                }
                             }
                         }
                     },

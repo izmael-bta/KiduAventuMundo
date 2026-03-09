@@ -1,48 +1,36 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth
 
-import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.UserRepository
 
-/**
- * Resultado de consulta de pregunta de seguridad.
- */
 sealed class SecurityQuestionResult {
     data class Success(val question: String) : SecurityQuestionResult()
     data class Error(val message: String) : SecurityQuestionResult()
 }
 
-/**
- * Resultado de cambio de contrasena.
- */
 sealed class PasswordResetResult {
     data object Success : PasswordResetResult()
     data class Error(val message: String) : PasswordResetResult()
 }
 
-/**
- * Caso de uso para recuperacion de cuenta mediante pregunta de seguridad.
- */
 class PasswordRecoveryService(
-    private val db: AppDatabaseHelper
+    private val repository: UserRepository
 ) {
-    /**
-     * Devuelve la pregunta de seguridad asociada al nickname.
-     */
-    fun getSecurityQuestion(nickname: String): SecurityQuestionResult {
+    private var userIdForReset: Long? = null
+
+    suspend fun getSecurityQuestion(nickname: String): SecurityQuestionResult {
         val nick = nickname.trim()
         if (nick.isBlank()) {
             return SecurityQuestionResult.Error("Ingresa tu nickname.")
         }
 
-        val user = db.getUserByNickname(nick)
+        val user = repository.getUserByNickname(nick)
             ?: return SecurityQuestionResult.Error("Usuario no encontrado.")
 
+        userIdForReset = user.id
         return SecurityQuestionResult.Success(user.securityQuestion)
     }
 
-    /**
-     * Valida respuesta de seguridad y actualiza contrasena.
-     */
-    fun resetPassword(
+    suspend fun resetPassword(
         nickname: String,
         securityAnswer: String,
         newPassword: String
@@ -58,10 +46,10 @@ class PasswordRecoveryService(
             return PasswordResetResult.Error("Ingresa la respuesta de seguridad.")
         }
         if (password.length < 6) {
-            return PasswordResetResult.Error("La contraseña debe tener al menos 6 caracteres.")
+            return PasswordResetResult.Error("La contrasena debe tener al menos 6 caracteres.")
         }
 
-        val user = db.getUserByNickname(nick)
+        val user = repository.getUserByNickname(nick)
             ?: return PasswordResetResult.Error("Usuario no encontrado.")
 
         val answerHash = PasswordHasher.hash(answer.lowercase())
@@ -69,15 +57,15 @@ class PasswordRecoveryService(
             return PasswordResetResult.Error("Respuesta de seguridad incorrecta.")
         }
 
-        val updated = db.updateUserPassword(
-            userId = user.id,
+        val updated = repository.updatePassword(
+            userId = userIdForReset ?: user.id,
             passwordHash = PasswordHasher.hash(password)
         )
 
         return if (updated) {
             PasswordResetResult.Success
         } else {
-            PasswordResetResult.Error("No se pudo actualizar la contraseña.")
+            PasswordResetResult.Error("No se pudo actualizar la contrasena.")
         }
     }
 }

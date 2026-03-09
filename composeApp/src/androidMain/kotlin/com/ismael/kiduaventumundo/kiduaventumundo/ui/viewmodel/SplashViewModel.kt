@@ -1,10 +1,9 @@
-import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.userRepository
+package com.ismael.kiduaventumundo.kiduaventumundo.ui.viewmodel
 
-class SplashViewModel(
-    private val repository: userRepository
-) {
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.session.UserSession
 
+class SplashViewModel {
     fun hasSession(): Boolean {
-        return repository.getSessionUserId() != null
+        return UserSession.currentUser != null
     }
 }

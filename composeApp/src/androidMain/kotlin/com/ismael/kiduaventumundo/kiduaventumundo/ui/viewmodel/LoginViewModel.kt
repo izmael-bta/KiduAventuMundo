@@ -1,35 +1,36 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
-//import com.ismael.kiduaventumundo.domain.repository.UserRepository
-import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.userRepository
-
-
+import androidx.lifecycle.viewModelScope
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.UserRepository
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.session.UserSession
+import kotlinx.coroutines.launch
 
 class LoginViewModel(
-    private val repository: userRepository
+    private val repository: UserRepository
 ) : ViewModel() {
 
-    fun login(nickname: String): LoginResult {
-
+    fun login(nickname: String, onResult: (LoginResult) -> Unit) {
         val nick = nickname.trim()
 
         if (nick.isBlank()) {
-            return LoginResult.Error("Ingresa tu nickname.")
+            onResult(LoginResult.Error("Ingresa tu nickname."))
+            return
         }
 
-        val user = repository.getUserByNickname(nick)
-
-        if (user == null) {
-            return LoginResult.Error("Usuario no encontrado. Crea una cuenta.")
+        viewModelScope.launch {
+            val user = repository.getUserByNickname(nick)
+            if (user == null) {
+                onResult(LoginResult.Error("Usuario no encontrado. Crea una cuenta."))
+            } else {
+                UserSession.setUser(user)
+                onResult(LoginResult.Success)
+            }
         }
-
-        repository.setSession(user.id)
-        return LoginResult.Success
     }
 }
 
 sealed class LoginResult {
-    object Success : LoginResult()
+    data object Success : LoginResult()
     data class Error(val message: String) : LoginResult()
 }

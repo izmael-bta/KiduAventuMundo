@@ -1,12 +1,13 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.operations.RegistrarUsuario
+import com.ismael.kiduaventumundo.ui.viewmodel.RegisterResult
+import front.models.UserProfileUi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-
-import com.ismael.kiduaventumundo.kiduaventumundo.domain.operations.RegistrarUsuario
-import front.models.UserProfileUi
-import com.ismael.kiduaventumundo.ui.viewmodel.RegisterResult
+import kotlinx.coroutines.launch
 
 class RegisterViewModel(
     private val registrarUsuario: RegistrarUsuario
@@ -16,14 +17,14 @@ class RegisterViewModel(
     val uiState: StateFlow<RegisterUiState> = _uiState
 
     fun register(profile: UserProfileUi) {
-
         _uiState.value = RegisterUiState(isLoading = true)
 
-        val result = registrarUsuario(profile)
-
-        _uiState.value = when (result) {
-            is RegisterResult.Success -> RegisterUiState(isSuccess = true)
-            is RegisterResult.Error -> RegisterUiState(error = result.message)
+        viewModelScope.launch {
+            val result = registrarUsuario(profile)
+            _uiState.value = when (result) {
+                is RegisterResult.Success -> RegisterUiState(isSuccess = true)
+                is RegisterResult.Error -> RegisterUiState(error = result.message)
+            }
         }
     }
 }

@@ -1,27 +1,19 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth
 
-import com.ismael.kiduaventumundo.kiduaventumundo.back.db.AppDatabaseHelper
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.SessionRepository
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.UserRepository
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.session.UserSession
 
-/**
- * Resultado del intento de inicio de sesion.
- */
 sealed class LoginResult {
     data object Success : LoginResult()
     data class Error(val message: String) : LoginResult()
 }
 
-/**
- * Caso de uso de autenticacion.
- *
- * Valida credenciales y registra sesion activa en DB local.
- */
 class LoginService(
-    private val db: AppDatabaseHelper
+    private val repository: UserRepository,
+    private val sessionRepository: SessionRepository
 ) {
-    /**
-     * Ejecuta login por nickname/password.
-     */
-    fun login(nickname: String, password: String): LoginResult {
+    suspend fun login(nickname: String, password: String): LoginResult {
         val nick = nickname.trim()
         val pass = password
 
@@ -30,18 +22,25 @@ class LoginService(
         }
 
         if (pass.isBlank()) {
-            return LoginResult.Error("Ingresa tu contraseña.")
+            return LoginResult.Error("Ingresa tu contrasena.")
         }
 
-        val user = db.getUserByNickname(nick)
-            ?: return LoginResult.Error("Usuario no encontrado.")
+        val response = repository.login(
+            nickname = nick,
+            passwordHash = PasswordHasher.hash(pass)
+        )
 
-        val passwordHash = PasswordHasher.hash(pass)
-        if (user.passwordHash != passwordHash) {
-            return LoginResult.Error("Contraseña incorrecta.")
+        val user = response?.user
+        return when {
+            response == null -> LoginResult.Error(
+                repository.getLastErrorMessage() ?: "No se pudo conectar al servidor."
+            )
+            response.success && user != null -> {
+                UserSession.setUser(user)
+                sessionRepository.setSessionUserId(user.id)
+                LoginResult.Success
+            }
+            else -> LoginResult.Error(response.message ?: "Credenciales invalidas.")
         }
-
-        db.setSession(user.id)
-        return LoginResult.Success
     }
 }

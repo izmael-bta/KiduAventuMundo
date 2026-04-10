@@ -1,5 +1,6 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.front.english
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,11 +27,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.EnglishLevel1Data
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.DialogConfirmAction
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.EnglishLevelSession
+import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.actions.EnglishManager
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.CompleteCard
+
+import com.ismael.kiduaventumundo.kiduaventumundo.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -46,6 +54,17 @@ fun EnglishLevel1Screen(
 
     val current = questions[state.value.index]
 
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ){
+        Image(
+            painter = painterResource(R.drawable.fondo_peach),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -133,48 +152,26 @@ fun EnglishLevel1Screen(
     }
 
     if (state.value.showEndDialog) {
-        AlertDialog(
-            onDismissRequest = { },
-            title = { Text(if (state.value.passed) "Nivel completado" else "Casi") },
-            text = {
-                if (state.value.passed) {
-                    Text("Ganaste ${state.value.starsLevel} estrellas. Se desbloqueo el Nivel 2.")
-                } else {
-                    Text(
-                        "Ganaste ${state.value.starsLevel} estrellas. Necesitas ${state.value.passStars} para pasar."
-                    )
-                }
-            },
-            confirmButton = {
-                if (state.value.passed) {
-                    Button(onClick = {
-                        val action = session.confirmDialog()
-                        state.value = session.state
-                        if (action == DialogConfirmAction.CONTINUE) {
-                            onFinished(session.consumeNextLevelAfterCompletion())
-                        }
-                    }) {
-                        Text("Continuar")
-                    }
-                } else {
-                    Button(onClick = {
-                        val action = session.confirmDialog()
-                        if (action == DialogConfirmAction.RETRY) {
-                            state.value = session.state
-                        }
-                    }) {
-                        Text("Reintentar")
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f)), // Oscurece el fondo para resaltar la tarjeta
+            contentAlignment = Alignment.Center
+        ) {
+            CompleteCard(
+                stars = if (state.value.passed) 3 else 1, // Calcula las estrellas según el puntaje
+                totalPoints = state.value.starsLevel * 50, // Cálculo de puntos /Pendiente
+                onContinue = {
+                    if (state.value.passed) {
+                        EnglishManager.completeLevel(level = 1, starsEarned = state.value.starsLevel)
+                        state.value.showEndDialog = false
+                        onFinished // Debe llevar de vuelta a la lista de niveles
+                    } else {
+                        val restartLevel = Unit // pendiente
+                        restartLevel
                     }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    state.value = session.closeDialog()
-                    onBack()
-                }) {
-                    Text("Salir")
-                }
-            }
-        )
+            )
+        }
     }
 }

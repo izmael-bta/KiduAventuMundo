@@ -38,4 +38,6 @@ object EnglishManager {
             levels[index + 1] = next.copy(isUnlocked = true)
         }
     }
+    // Cuestiones de EnglshActScreen
+    fun getActivityStars(level: Int, totalActivities: Int) {}
 }

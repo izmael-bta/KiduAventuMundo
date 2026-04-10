@@ -24,7 +24,6 @@ import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.LoginService
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.PasswordRecoveryService
 import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.EnglishMenuScreen
 import com.ismael.kiduaventumundo.kiduaventumundo.data.remote.RemoteGraph
-import com.ismael.kiduaventumundo.kiduaventumundo.domain.operations.RegistrarUsuario
 import com.ismael.kiduaventumundo.kiduaventumundo.domain.session.UserSession
 import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishActivitiesScreen
 import com.ismael.kiduaventumundo.kiduaventumundo.front.english.EnglishLevel1Screen
@@ -136,17 +135,20 @@ fun AndroidApp() {
                 onBackToLogin = { navController.popBackStack() }
             )
         }
-
         composable(Routes.REGISTER) {
-            val registrarUsuario = RegistrarUsuario(userRepository, sessionRepository)
+
             RegisterScreen(
-                registrarUsuario = registrarUsuario,
+
                 onRegisterSuccess = {
+
                     hasSession = true
+
                     navController.navigate(Routes.MENU) {
                         popUpTo(Routes.REGISTER) { inclusive = true }
                     }
+
                 }
+
             )
         }
 
@@ -181,10 +183,10 @@ fun AndroidApp() {
             val progress = EnglishManager.getProgressSummary()
             ProgressScreen(
                 totalStars = progress.totalStars,
+                activitiesCompleted = progress.activitiesCompleted,
                 currentLevel = progress.currentLevel,
                 unlockedLevels = progress.unlockedLevels,
-                activitiesCompleted = progress.activitiesCompleted,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
             )
         }
 

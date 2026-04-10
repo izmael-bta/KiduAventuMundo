@@ -11,7 +11,7 @@ data class LevelSessionState(
     val mistakes: Int,
     val feedback: String?,
     val locked: Boolean,
-    val showEndDialog: Boolean,
+    var showEndDialog: Boolean,
     val passed: Boolean,
     val totalActivities: Int,
     val passStars: Int

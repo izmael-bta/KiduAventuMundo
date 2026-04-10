@@ -12,7 +12,7 @@ class ApiClient(
 ) {
     val baseUrl: String = baseUrl.trimEnd('/')
     init {
-        Log.d("ApiClient", "BASE_URL efectiva en runtime: $baseUrl")
+        Log.d("ApiClient", "BASE_URL efectiva en runtime: ${this.baseUrl}")
     }
 
     val httpClient: HttpClient = HttpClient(OkHttp) {

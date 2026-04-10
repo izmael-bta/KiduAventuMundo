@@ -16,7 +16,7 @@ kotlin {
         }
     }
 
-    listOf(
+   /* listOf(
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
@@ -24,7 +24,7 @@ kotlin {
             baseName = "ComposeApp"
             isStatic = true
         }
-    }
+    }*/
 
     sourceSets {
         androidMain.dependencies {

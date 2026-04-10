@@ -6,30 +6,30 @@ import com.ismael.kiduaventumundo.kiduaventumundo.data.remote.model.User
 import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.UserRepository
 
 class UserRepositoryImpl(
-    private val userApi: UserApi
+    private val api: UserApi
 ) : UserRepository {
 
-    override suspend fun register(user: User): User? = userApi.createUser(user)
+    override suspend fun register(user: User): User? =
+        api.createUser(user)
 
-    override suspend fun getUserById(userId: Long): User? = userApi.getUserById(userId)
+    override suspend fun getUserById(userId: Long): User? =
+        api.getUserById(userId)
 
-    override suspend fun getUserByNickname(nickname: String): User? = userApi.getUserByNickname(nickname)
+    override suspend fun getUserByNickname(nickname: String): User? =
+        api.getUserByNickname(nickname)
 
-    override suspend fun login(nickname: String, passwordHash: String): LoginResponse? {
-        return userApi.login(nickname = nickname, passwordHash = passwordHash)
-    }
+    override suspend fun login(nickname: String, passwordHash: String): LoginResponse? =
+        api.login(nickname, passwordHash)
 
-    override fun getLastErrorMessage(): String? = userApi.getLastErrorMessage()
+    override fun getLastErrorMessage(): String? =
+        api.getLastErrorMessage()
 
-    override suspend fun nicknameExists(nickname: String): Boolean {
-        return userApi.getUserByNickname(nickname) != null
-    }
+    override suspend fun nicknameExists(nickname: String): Boolean =
+        api.getUserByNickname(nickname) != null
 
-    override suspend fun updateAvatar(userId: Long, avatarId: String): Boolean {
-        return userApi.updateUserAvatar(userId = userId, avatarId = avatarId)
-    }
+    override suspend fun updateAvatar(userId: Long, avatarId: String): Boolean =
+        api.updateUserAvatar(userId, avatarId)
 
-    override suspend fun updatePassword(userId: Long, passwordHash: String): Boolean {
-        return userApi.updateUserPassword(userId = userId, passwordHash = passwordHash)
-    }
+    override suspend fun updatePassword(userId: Long, passwordHash: String): Boolean =
+        api.updateUserPassword(userId, passwordHash)
 }

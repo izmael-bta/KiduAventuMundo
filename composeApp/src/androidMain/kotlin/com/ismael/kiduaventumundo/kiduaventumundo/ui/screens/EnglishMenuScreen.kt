@@ -3,11 +3,24 @@ package com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.ki
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,8 +31,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import com.ismael.kiduaventumundo.kiduaventumundo.R
 import androidx.compose.ui.unit.dp
+import com.ismael.kiduaventumundo.kiduaventumundo.R
 
 data class EnglishLevel(
     val level: Int,
@@ -35,9 +48,7 @@ fun EnglishMenuScreen(
     onBack: () -> Unit,
     onLevelClick: (Int) -> Unit
 ) {
-    // B A C K G R O U N D
-    Box(modifier = Modifier
-        .fillMaxSize()){
+    Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.fondo_aqua),
             contentDescription = null,
@@ -52,14 +63,13 @@ fun EnglishMenuScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 24.dp, bottom = 16.dp),
-            textAlign = TextAlign.Center, // Centrado total
+            textAlign = TextAlign.Center,
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontWeight = FontWeight.ExtraBold,
-                fontFamily = FontFamily.SansSerif // Fuente redondeada
+                fontFamily = FontFamily.SansSerif
             ),
-            color = Color(0xFF006064) // Verde oscuro que combine con el fondo
+            color = Color(0xFF006064)
         )
-        //Text("Selecciona un nivel", style = MaterialTheme.typography.bodyMedium)
 
         Spacer(Modifier.height(16.dp))
 
@@ -77,17 +87,17 @@ fun EnglishMenuScreen(
 
         Box(
             modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center // Centra el botón pequeño
+            contentAlignment = Alignment.Center
         ) {
             OutlinedButton(
-                onClick = { onBack() },
+                onClick = onBack,
                 modifier = Modifier
-                    .width(150.dp) // Tamaño controlado
+                    .width(150.dp)
                     .padding(bottom = 20.dp),
                 shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(2.dp, Color(0xFFD32F2F)), // Borde rojo indicando salida
+                border = BorderStroke(2.dp, Color(0xFFD32F2F)),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = Color(0xFFD32F2F) // Texto rojo
+                    contentColor = Color(0xFFD32F2F)
                 )
             ) {
                 Text("Volver", fontWeight = FontWeight.Bold)
@@ -102,22 +112,23 @@ private fun LevelCard(
     onClick: () -> Unit
 ) {
     val statusText = when {
-        lvl.isCompleted -> "✅ Completado"
-        lvl.isUnlocked -> "🧩 Disponible"
-        else -> "🔒"
+        lvl.isCompleted -> "Completado"
+        lvl.isUnlocked -> "Disponible"
+        else -> "Bloqueado"
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .alpha(if (lvl.isUnlocked) 1f else 0.6f), // Opaco si está bloqueado
-        shape = RoundedCornerShape(28.dp), // Más redondeado
+            .clickable(enabled = lvl.isUnlocked, onClick = onClick)
+            .alpha(if (lvl.isUnlocked) 1f else 0.6f),
+        shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (lvl.isUnlocked) Color.White else Color(0xFFF5F5F5)
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (lvl.isUnlocked) 6.dp else 0.dp // Solo los disponibles tienen sombra
+            defaultElevation = if (lvl.isUnlocked) 6.dp else 0.dp
         )
     ) {
         Column(Modifier.padding(14.dp)) {

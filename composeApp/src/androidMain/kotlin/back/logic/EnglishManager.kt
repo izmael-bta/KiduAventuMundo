@@ -165,9 +165,11 @@ object EnglishManager {
         val current = levels[index]
         levels[index] = current.copy(isCompleted = true)
 
+        var nextUnlockedLevel: Int? = null
         if (index + 1 < levels.size) {
             val next = levels[index + 1]
             levels[index + 1] = next.copy(isUnlocked = true)
+            nextUnlockedLevel = next.level
         }
 
         ioScope.launch {
@@ -182,6 +184,19 @@ object EnglishManager {
                     bestStars = earned
                 )
             )
+            nextUnlockedLevel?.let { nextLevel ->
+                progressRepository?.upsertLevelProgress(
+                    userId = userId,
+                    level = nextLevel,
+                    progress = UserLevelProgress(
+                        userId = userId,
+                        level = nextLevel,
+                        isUnlocked = true,
+                        isCompleted = false,
+                        bestStars = bestStarsByLevel[nextLevel] ?: 0
+                    )
+                )
+            }
         }
     }
 

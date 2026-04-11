@@ -1,6 +1,7 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.front.english
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,8 +15,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -28,7 +30,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.ActivityStatus
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.EnglishActivitiesUseCase
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.actions.EnglishManager
 
 @Composable
 fun EnglishActivitiesScreen(
@@ -38,9 +39,7 @@ fun EnglishActivitiesScreen(
     onBack: () -> Unit,
     onStartActivity: (Int) -> Unit
 ) {
-    // 1. Aquí se crea la variable (No la muevas de aquí)
-    val starsByActivity = EnglishManager.getActivityStars(level, totalActivities)
-    val activities = (0 until totalActivities).toList()
+    val activities = EnglishActivitiesUseCase.getActivities(level, totalActivities)
 
     Column(
         modifier = Modifier
@@ -48,38 +47,81 @@ fun EnglishActivitiesScreen(
             .padding(all = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Título Centrado
         Text(
             text = "Nivel $level: $levelTitle",
             modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center, // Centrado superior
+            textAlign = TextAlign.Center,
             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
         )
 
-        // Tu LazyColumn actual con las actividades
         LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(activities) { activityIndex ->
-                // Ccódigo de Row y Button
+            items(activities) { activity ->
+                val isEnabled = activity.status != ActivityStatus.BLOCKED
+                val statusText = when (activity.status) {
+                    ActivityStatus.COMPLETED -> "Completada"
+                    ActivityStatus.AVAILABLE -> "Disponible"
+                    ActivityStatus.BLOCKED -> "Bloqueada"
+                }
+                val actionText = when (activity.status) {
+                    ActivityStatus.COMPLETED -> "Repetir"
+                    ActivityStatus.AVAILABLE -> "Jugar"
+                    ActivityStatus.BLOCKED -> "Candado"
+                }
+                val starsText = activity.earnedStars?.let { " | $it estrellas" } ?: ""
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(enabled = isEnabled) {
+                            onStartActivity(activity.activityIndex)
+                        },
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = when (activity.status) {
+                            ActivityStatus.COMPLETED -> Color(0xFFE8F5E9)
+                            ActivityStatus.AVAILABLE -> Color.White
+                            ActivityStatus.BLOCKED -> Color(0xFFF3F3F3)
+                        }
+                    ),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = if (isEnabled) 6.dp else 1.dp
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Actividad ${activity.activityIndex + 1}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = statusText + starsText,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (isEnabled) Color(0xFF37474F) else Color(0xFF9E9E9E)
+                            )
+                        }
+
+                        Text(
+                            text = actionText,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (isEnabled) Color(0xFF00695C) else Color(0xFF9E9E9E)
+                        )
+                    }
+                }
             }
         }
 
-        // --- AQUÍ VA LA LÓGICA DE DESBLOQUEO (Dentro de la función) ---
-
-        // Verificamos si todas las actividades tienen estrellas
-        /*val allActivitiesDone = starsByActivity.all { it != null }
-        val totalStarsEarned = starsByActivity.filterNotNull().sum()
-
-        if (allActivitiesDone) {
-            // Esto desbloquea el nivel 2 en el EnglishManager
-            EnglishManager.completeLevel(level = level, starsEarned = totalStarsEarned)
-        } */
-
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón "Volver" pequeño, rojo y centrado
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             OutlinedButton(
                 onClick = onBack,
@@ -91,5 +133,5 @@ fun EnglishActivitiesScreen(
                 Text("Volver a niveles", fontWeight = FontWeight.Bold)
             }
         }
-    } // Aquí cierra el Column
-} // Aquí cierra la función
+    }
+}

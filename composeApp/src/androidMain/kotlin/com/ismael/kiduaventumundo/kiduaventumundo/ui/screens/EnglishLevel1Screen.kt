@@ -13,13 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,13 +29,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.ismael.kiduaventumundo.kiduaventumundo.R
 import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.EnglishLevel1Data
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.DialogConfirmAction
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.EnglishLevelSession
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.actions.EnglishManager
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.CompleteCard
-
-import com.ismael.kiduaventumundo.kiduaventumundo.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -57,7 +52,7 @@ fun EnglishLevel1Screen(
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
-    ){
+    ) {
         Image(
             painter = painterResource(R.drawable.fondo_peach),
             contentDescription = null,
@@ -65,6 +60,7 @@ fun EnglishLevel1Screen(
             modifier = Modifier.fillMaxSize()
         )
     }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -131,7 +127,7 @@ fun EnglishLevel1Screen(
                         ) {
                             Text(
                                 opt.labelEn,
-                                color = androidx.compose.ui.graphics.Color.White,
+                                color = Color.White,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -155,20 +151,17 @@ fun EnglishLevel1Screen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f)), // Oscurece el fondo para resaltar la tarjeta
+                .background(Color.Black.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center
         ) {
             CompleteCard(
-                stars = if (state.value.passed) 3 else 1, // Calcula las estrellas según el puntaje
-                totalPoints = state.value.starsLevel * 50, // Cálculo de puntos /Pendiente
+                stars = if (state.value.passed) 3 else 1,
+                totalPoints = state.value.starsLevel * 50,
                 onContinue = {
-                    if (state.value.passed) {
-                        EnglishManager.completeLevel(level = 1, starsEarned = state.value.starsLevel)
-                        state.value.showEndDialog = false
-                        onFinished // Debe llevar de vuelta a la lista de niveles
-                    } else {
-                        val restartLevel = Unit // pendiente
-                        restartLevel
+                    val action = session.confirmDialog()
+                    state.value = session.state
+                    if (action == DialogConfirmAction.CONTINUE) {
+                        onFinished(session.consumeNextLevelAfterCompletion())
                     }
                 }
             )

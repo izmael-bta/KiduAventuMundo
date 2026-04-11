@@ -11,13 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.EnglishLevel2Data
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.DialogConfirmAction
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.EnglishLevelSession
-import com.ismael.kiduaventumundo.kiduaventumundo.com.ismael.kiduaventumundo.kiduaventumundo.domain.actions.EnglishManager
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.CompleteCard
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -79,7 +75,7 @@ fun EnglishLevel2Screen(
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             current.options.chunked(2).forEach { row ->
                 Row(
-                    Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     row.forEach { opt ->
@@ -132,25 +128,17 @@ fun EnglishLevel2Screen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f)), // Oscurece el fondo para resaltar la tarjeta
+                .background(Color.Black.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center
         ) {
             CompleteCard(
                 stars = if (state.value.passed) 3 else 1,
-                totalPoints = state.value.starsLevel * 10, // Los puntos basados en lógica actual
+                totalPoints = state.value.starsLevel * 10,
                 onContinue = {
-
-                    if (state.value.passed) {
-                        // Si pasó, guardamos progreso y cerramos
-                        EnglishManager.completeLevel(level = 2, starsEarned = state.value.starsLevel)
-                        state.value.showEndDialog = false
-                        onFinished
-                    } else {
-                        // Si no pasó, reiniciamos el nivel para que lo intente de nuevo
-                        val restartLevel = Unit // pendiente
-                        restartLevel
-                        /*Button( {restartLevel()})
-                        Text("Reintentar")*/
+                    val action = session.confirmDialog()
+                    state.value = session.state
+                    if (action == DialogConfirmAction.CONTINUE) {
+                        onFinished(session.consumeNextLevelAfterCompletion())
                     }
                 }
             )

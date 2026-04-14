@@ -167,6 +167,7 @@ fun AndroidApp() {
 
             LaunchedEffect(sessionUser.id) {
                 EnglishManager.bindUserSession(userId = sessionUser.id)
+                EnglishManager.refreshSummaryFromApi(userId = sessionUser.id)
             }
 
             MenuScreen(

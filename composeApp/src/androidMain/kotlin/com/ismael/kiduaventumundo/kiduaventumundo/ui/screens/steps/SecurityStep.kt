@@ -14,6 +14,7 @@ fun SecurityStep(
 
     var question by remember { mutableStateOf("") }
     var answer by remember { mutableStateOf("") }
+    val isFormValid = question.trim().isNotEmpty() && answer.trim().isNotEmpty()
 
     Column {
 
@@ -52,8 +53,10 @@ fun SecurityStep(
             }
 
             Button(onClick = {
-                onFinish(question, answer)
-            }){
+                onFinish(question.trim(), answer.trim())
+            },
+                enabled = isFormValid
+            ){
                 Text("Crear Cuenta")
             }
 

@@ -1,9 +1,11 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens.steps
 
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -13,6 +15,9 @@ fun AgeStep(
 ){
 
     var age by remember { mutableStateOf("") }
+    val parsedAge = age.toIntOrNull()
+    val showAgeError = age.isNotBlank() && (parsedAge == null || parsedAge <= 0)
+    val isAgeValid = parsedAge != null && parsedAge > 0
 
     Column {
 
@@ -25,9 +30,20 @@ fun AgeStep(
 
         OutlinedTextField(
             value = age,
-            onValueChange = { age = it },
+            onValueChange = { newValue ->
+                if (newValue.all { it.isDigit() }) {
+                    age = newValue
+                }
+            },
             label = { Text("Edad") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = showAgeError,
+            supportingText = {
+                if (showAgeError) {
+                    Text("Ingresa una edad mayor a 0")
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(30.dp))
@@ -42,8 +58,10 @@ fun AgeStep(
             }
 
             Button(onClick = {
-                onNext(age.toIntOrNull() ?: 0)
-            }){
+                onNext(parsedAge ?: -1)
+            },
+                enabled = isAgeValid
+            ){
                 Text("Continuar")
             }
 

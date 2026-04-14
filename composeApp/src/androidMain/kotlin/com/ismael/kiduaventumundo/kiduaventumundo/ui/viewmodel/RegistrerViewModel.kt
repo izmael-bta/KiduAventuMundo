@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
 
+import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.PasswordHasher
 import com.ismael.kiduaventumundo.kiduaventumundo.data.remote.model.User
 
 /*
@@ -73,12 +74,16 @@ class RegisterViewModel(
             */
             if (
                 uiState.name.isBlank() ||
+                uiState.age <= 0 ||
                 uiState.nickname.isBlank() ||
-                uiState.password.isBlank()
+                uiState.password.isBlank() ||
+                uiState.avatarId.isBlank() ||
+                uiState.securityQuestion.isBlank() ||
+                uiState.securityAnswer.isBlank()
             ) {
 
                 uiState = uiState.copy(
-                    error = "Completa todos los campos"
+                    error = "Completa todos los campos y usa una edad valida"
                 )
 
                 return@launch
@@ -103,10 +108,12 @@ class RegisterViewModel(
                     name = uiState.name,
                     age = uiState.age,
                     nickname = uiState.nickname,
-                    passwordHash = uiState.password,
+                    passwordHash = PasswordHasher.hash(uiState.password),
                     avatarId = uiState.avatarId,
                     securityQuestion = uiState.securityQuestion,
-                    securityAnswerHash = uiState.securityAnswer
+                    securityAnswerHash = PasswordHasher.hash(
+                        uiState.securityAnswer.trim().lowercase()
+                    )
                 )
 
 

@@ -78,6 +78,12 @@ object EnglishManager {
         loadProgressFromApi()
     }
 
+    suspend fun refreshSummaryFromApi(userId: Long? = activeUserId) {
+        val resolvedUserId = userId ?: return
+        val summary = reportsRepository?.getSummary(resolvedUserId) ?: return
+        stars.value = summary.totalStars
+    }
+
     suspend fun persistCurrentUserProgress() {
         persistProgressToApi()
     }

@@ -27,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,8 +45,6 @@ import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.EnglishLeve
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.AnimatedCircle
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.AnimatedFlower
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.CompleteCard
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun EnglishLevel1Screen(
@@ -57,7 +54,6 @@ fun EnglishLevel1Screen(
     val questions = remember { EnglishLevel1Data.questions() }
     val session = remember { EnglishLevelSession(level = 1, totalActivities = questions.size) }
     var state = remember { mutableStateOf(session.state) }
-    val scope = rememberCoroutineScope()
 
     val current = questions[state.value.index]
 
@@ -177,13 +173,6 @@ Box(modifier = Modifier.fillMaxSize()){
                                                 correctId = current.correctId
                                             )
                                             state.value = result.state
-
-                                            if (result.isCorrect) {
-                                                scope.launch {
-                                                    delay(650)
-                                                    state.value = session.advanceAfterCorrect()
-                                                }
-                                            }
                                         }
                                     } else {
                                         Modifier
@@ -219,6 +208,24 @@ Box(modifier = Modifier.fillMaxSize()){
         }
     }
 
+    if (state.value.showActivityResultDialog) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center
+        ) {
+            CompleteCard(
+                stars = state.value.activityStarsEarned,
+                totalPoints = state.value.starsLevel * 50,
+                title = "Actividad completada",
+                onContinue = {
+                    state.value = session.continueAfterActivityResult()
+                }
+            )
+        }
+    }
+
     if (state.value.showEndDialog) {
         Box(
             modifier = Modifier
@@ -229,6 +236,13 @@ Box(modifier = Modifier.fillMaxSize()){
             CompleteCard(
                 stars = if (state.value.passed) 3 else 1,
                 totalPoints = state.value.starsLevel * 50,
+                title = if (state.value.passed) "Nivel completado" else "Casi",
+                message = if (state.value.passed) {
+                    "Terminaste la mision con ${state.value.starsLevel} estrellas."
+                } else {
+                    "Ganaste ${state.value.starsLevel} estrellas. Necesitas ${state.value.passStars} para pasar."
+                },
+                buttonText = if (state.value.passed) "Continuar" else "Reintentar",
                 onContinue = {
                     val action = session.confirmDialog()
                     state.value = session.state

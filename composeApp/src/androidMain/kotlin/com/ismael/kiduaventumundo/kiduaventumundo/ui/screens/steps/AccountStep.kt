@@ -14,6 +14,7 @@ fun AccountStep(
 
     var nickname by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val isFormValid = nickname.trim().isNotEmpty() && password.isNotBlank()
 
     Column(
         modifier = Modifier
@@ -59,8 +60,9 @@ fun AccountStep(
 
             Button(
                 onClick = {
-                    onNext(nickname, password)
-                }
+                    onNext(nickname.trim(), password)
+                },
+                enabled = isFormValid
             ){
                 Text("Continuar")
             }

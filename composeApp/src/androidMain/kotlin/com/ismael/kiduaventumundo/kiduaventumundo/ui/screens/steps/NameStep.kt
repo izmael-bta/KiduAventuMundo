@@ -12,6 +12,7 @@ fun NameStep(
 ){
 
     var name by remember { mutableStateOf("") }
+    val isNameValid = name.trim().isNotEmpty()
 
     Column {
 
@@ -32,8 +33,9 @@ fun NameStep(
         Spacer(modifier = Modifier.height(30.dp))
 
         Button(
-            onClick = { onNext(name) },
-            modifier = Modifier.fillMaxWidth()
+            onClick = { onNext(name.trim()) },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = isNameValid
         ){
             Text("Continuar")
         }

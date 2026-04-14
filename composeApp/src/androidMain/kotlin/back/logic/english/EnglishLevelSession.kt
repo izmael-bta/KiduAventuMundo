@@ -11,6 +11,8 @@ data class LevelSessionState(
     val mistakes: Int,
     val feedback: String?,
     val locked: Boolean,
+    val showActivityResultDialog: Boolean,
+    val activityStarsEarned: Int,
     var showEndDialog: Boolean,
     val passed: Boolean,
     val totalActivities: Int,
@@ -53,6 +55,8 @@ class EnglishLevelSession(
         mistakes = 0,
         feedback = null,
         locked = false,
+        showActivityResultDialog = false,
+        activityStarsEarned = 0,
         showEndDialog = false,
         passed = false,
         totalActivities = totalActivities,
@@ -89,20 +93,23 @@ class EnglishLevelSession(
         _state = _state.copy(
             locked = true,
             starsLevel = activityStars.sumOf { it ?: 0 },
-            feedback = "+$earned *"
+            feedback = "+$earned *",
+            showActivityResultDialog = true,
+            activityStarsEarned = earned
         )
         return SelectionResult(_state, isCorrect = true)
     }
 
     /**
-     * Avanza a la siguiente actividad o abre dialogo final si ya termino.
+     * Cierra el resultado de actividad y avanza o abre dialogo final si ya termino.
      */
-    fun advanceAfterCorrect(): LevelSessionState {
-        if (!_state.locked) return _state
+    fun continueAfterActivityResult(): LevelSessionState {
+        if (!_state.showActivityResultDialog) return _state
 
         val isLast = _state.index == totalActivities - 1
         _state = if (isLast) {
             _state.copy(
+                showActivityResultDialog = false,
                 passed = _state.starsLevel >= passStars,
                 showEndDialog = true
             )
@@ -111,7 +118,9 @@ class EnglishLevelSession(
                 index = _state.index + 1,
                 mistakes = 0,
                 feedback = null,
-                locked = false
+                locked = false,
+                showActivityResultDialog = false,
+                activityStarsEarned = 0
             )
         }
         return _state
@@ -127,6 +136,8 @@ class EnglishLevelSession(
             mistakes = 0,
             feedback = null,
             locked = false,
+            showActivityResultDialog = false,
+            activityStarsEarned = 0,
             showEndDialog = false,
             passed = false
         )
@@ -134,7 +145,7 @@ class EnglishLevelSession(
     }
 
     fun closeDialog(): LevelSessionState {
-        _state = _state.copy(showEndDialog = false)
+        _state = _state.copy(showEndDialog = false, showActivityResultDialog = false)
         return _state
     }
 
@@ -149,7 +160,7 @@ class EnglishLevelSession(
                 level = level,
                 starsEarned = _state.starsLevel
             )
-            _state = _state.copy(showEndDialog = false)
+            _state = _state.copy(showEndDialog = false, showActivityResultDialog = false)
             DialogConfirmAction.CONTINUE
         } else {
             restartLevel()

@@ -152,7 +152,7 @@ fun MenuScreen(
                 )
             ) {
                 Text(
-                    text = "Ajustes",
+                    text = "Perfil",
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White
                 )

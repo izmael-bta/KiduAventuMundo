@@ -1,5 +1,7 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,6 +25,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -52,7 +59,7 @@ fun ProgressScreen(
     unlockedLevels: Int,
     onBack: () -> Unit,
 
-) {
+) {         // B O R D E S  R E D O N D E A D O S **
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -72,6 +79,7 @@ fun ProgressScreen(
 
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.Center, // P E N D I E N T E *
             horizontalAlignment = Alignment.CenterHorizontally
             //verticalArrangement = Arrangement.Center // Centra Card y botón//
         ) {
@@ -79,7 +87,7 @@ fun ProgressScreen(
             Text(
                 text = "¡Tu Progreso!",
                 style = MaterialTheme.typography.displayMedium.copy(
-                    fontWeight = FontWeight.ExtraBold,
+                    fontWeight = FontWeight.Black, //ExtraBold,
                     color = Color(0xFFFFFFFF), // Azul KIDU
                     fontSize = 48.sp, // Tamaño grande 42
                     fontFamily = FontFamily.SansSerif // Fuente redondeada
@@ -91,43 +99,44 @@ fun ProgressScreen(
                 textAlign = TextAlign.Center */
             )
             // 2. LA TARJETA
-            Card(                       // Esquinas Redondeadas - Tipo de letra - Título
+            Card(        // Esquinas Redondeadas - Tipo de letra - Título
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth() // 0.9f
                     .wrapContentHeight()
                     //.align(Alignment.Center)
-                    .padding(top = 80.dp),
+                    .padding(16.dp), // 80
                 shape = RoundedCornerShape(40.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                 elevation = CardDefaults.cardElevation(defaultElevation = 12.dp) // 0
             ) {
                 Column(
                     modifier = Modifier
-                        .background(Brush.verticalGradient(colors = listOf(Color(0xFF923AB7), Color(0xFFE91E63))))
+                        .background(Brush.verticalGradient(colors = listOf(Color(0xFAF5CE5A), Color(0xFFE8C275))))
                         /*.padding(horizontal = 26.dp, vertical = 30.dp)*/
-                        .padding(24.dp),
+                        .padding(32.dp), // 24
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(20.dp) // 16
                 ) {
                     // Barras de progreso (Rosa, Naranja, Verde, Azul)
-                    ProgressBar("Estrellas Totales", totalStars.toString(), Color(0xFFF48FB1), totalStars / 100f)
-                    ProgressBar("Actividades", "$activitiesCompleted", Color(0xFFFFB74D), activitiesCompleted / 10f)
-                    ProgressBar("Nivel Actual", currentLevel.toString(), Color(0xFF81C784), currentLevel / 8f)
-                    ProgressBar("Desbloqueados", unlockedLevels.toString(), Color(0xFF81D4FA), unlockedLevels / 8f)
+                    AnimatedProgressBar("Estrellas Totales", totalStars.toString(), Color(0xFFF48FB1), totalStars / 100f)
+                    AnimatedProgressBar("Actividades", "$activitiesCompleted", Color(0xFFC165FA), activitiesCompleted / 10f)
+                    AnimatedProgressBar("Nivel Actual", currentLevel.toString(), Color(0xFF81C784), currentLevel / 8f)
+                    AnimatedProgressBar("Desbloqueados", unlockedLevels.toString(), Color(0xFF81D4FA), unlockedLevels / 8f)
                 }
             }
             Spacer(modifier = Modifier.height(32.dp))
 
             // Botón "Volver" centrado, pequeño y rojo
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                OutlinedButton(
-                    onClick = onBack,
-                    modifier = Modifier.width(200.dp), // Tamaño rducido
-                    border = BorderStroke(2.dp, Color.Red), // Delineado rojo
-                   shape = RoundedCornerShape(20.dp), // Bordes redondeados
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
+                OutlinedButton(onClick = onBack,        // Padding pendiente *
+                    modifier = Modifier.width(160.dp) .padding(top = 24.dp), // Tamaño rducido
+                    //border = BorderStroke(2.dp, Color.Yellow), // Delineado rojo
+                    shape = RoundedCornerShape(20.dp), // Bordes redondeados
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xD2AD2605))
+                    //colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
                 ){
-                    Text("Volver", fontWeight = FontWeight.Bold)
+                    Text("Volver", fontWeight = FontWeight.Bold, color = Color.White)
+                   // Text("Volver", fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -135,21 +144,39 @@ fun ProgressScreen(
 }
 // Componente auxiliar para las barras
 @Composable
-fun ProgressBar(
+fun AnimatedProgressBar(
     title: String,
     value: String,
     barColor: Color,
-    progressPercentage: Float // Entre 0.0f y 1.0f
+    targetProgress: Float
+   // progressPercentage: Float // Entre 0.0f y 1.0f
 ) {
+    // Para Iniciar la animacion
+    var startAnim by remember { mutableStateOf(false) }
+
+    // Define animacion de Float
+    val progressAnimation by animateFloatAsState(
+        targetValue = if (startAnim) targetProgress else 0f,
+        animationSpec = tween(durationMillis = 1000) // 1 seg duracion
+    )
+    // Inicia animacion al cargar pantalla
+    LaunchedEffect(Unit){
+        startAnim = true
+    }
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         // Título de la barra
         Text(
             text = title,
-            style = MaterialTheme.typography.titleLarge.copy(
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF01579B),
+            modifier = Modifier.padding(bottom = 4.dp)
+            /*style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFFFFFFFF), // Azul KIDU
                 fontSize = 22.sp
-            )
+            )*/
         )
 
         // La Barra "Cápsula"
@@ -160,23 +187,23 @@ fun ProgressBar(
                 .background(
                     Color.White.copy(alpha = 0.6f),
                     RoundedCornerShape(15.dp) // Fondo blanco suave
-                ) // Fondo de la cápsula
+                ) // FONDO DE CAPSULA
                 .padding(3.dp) // Espacio interno
         ) {
-            // Progreso real ANIMADO
+                                        // Progreso real ANIMADO
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(progressPercentage)
+                    .fillMaxWidth(progressAnimation) // Valor animado // progressPorcentage
                     .fillMaxHeight()
-                    .background(barColor, RoundedCornerShape(16.dp)) // Color de la barra
+                    .background(barColor, RoundedCornerShape(12.dp)) // Color de la barra // 16
             )
-            // Valor numérico
+                                // V A L O R  N U M E R I C O
             Text(
                 text = value,
                 modifier = Modifier.align(Alignment.Center),
-                color = Color.White,
+                color = if (progressAnimation > 0.1f) Color.White else Color.Gray, // White-Gray // Color.White,
                 fontWeight = FontWeight.Black,
-                fontSize = 18.sp
+                fontSize = 16.sp // 18
             )
         }
     }

@@ -7,6 +7,9 @@ import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.QuizQuestio
  * Banco de preguntas del nivel 3 (animales).
  */
 object EnglishLevel3Data {
+    private val CAT = ObjectOption("cat", "CAT", "\uD83D\uDC31")
+    private val DOG = ObjectOption("dog", "DOG", "\uD83D\uDC36")
+
     fun questions(): List<QuizQuestion> = listOf(
         QuizQuestion("Select: CAT", "Tap the correct animal", "cat", listOf(
             QuizOption("cat", "CAT"),

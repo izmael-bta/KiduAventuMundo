@@ -1,5 +1,7 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.front.english
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,9 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -22,11 +29,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.ismael.kiduaventumundo.kiduaventumundo.R
 import com.ismael.kiduaventumundo.kiduaventumundo.back.data.english.EnglishLevel2Data
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.DialogConfirmAction
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.EnglishLevelSession
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.AnimatedCircle
 import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.CompleteCard
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -43,20 +57,89 @@ fun EnglishLevel2Screen(
 
     val current = questions[state.value.index]
 
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(R.drawable.fondo_purh),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+    Box(modifier = Modifier.fillMaxSize()){
+        AnimatedCircle()
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalAlignment = Alignment.CenterHorizontally
+       // verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Nivel 2: Objetos", style = MaterialTheme.typography.headlineSmall)
-        Text("* ${state.value.starsLevel} / ${state.value.passStars}", style = MaterialTheme.typography.titleMedium)
-        Text(
-            "Actividad ${state.value.index + 1} / ${state.value.totalActivities}",
-            style = MaterialTheme.typography.bodyMedium
-        )
+        Spacer(modifier = Modifier.height(30.dp))
+        Text("Nivel 2", fontSize = 18.sp, color = Color.White, fontFamily = FontFamily.SansSerif)
+        Text("Objects", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = Color.White, textAlign = TextAlign.Center)
+        //Text("Actividad ${state.value.index + 1} / ${state.value.totalActivities}", style = MaterialTheme.typography.bodyMedium)
+        // --- SECCIÓN DE ESTRELLAS Y RETO ---
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            // CÁPSULA DE ESTRELLAS
+            Surface(
+                shape = CircleShape, // Forma de cápsula
+                color = Color(0xFFFF9100) .copy(alpha = 0.4f), // Naranja translúcido
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f))
+            ) {
+                Text(
+                    text = "${state.value.starsLevel} / ${state.value.passStars} ⭐",
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // CÁPSULA RETO
+            Surface(
+                shape = CircleShape, // Forma de cápsula
+                color = Color(0xFF039BE5).copy(alpha = 0.4f), // Azul translúcido
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f))
+            ) {
+                Text(
+                    text = "${state.value.index + 1} / ${state.value.totalActivities}",
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                )
+            }
+        }
 
         Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp)) {
+                Text(
+                    current.promptEn,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                )
+                Spacer(Modifier.height(6.dp))
+                Text("Tap 👆 the correct object", style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "❌ ${state.value.mistakes}",            // E R R O R E S * * *
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+       /* Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
                 Text(
                     current.promptEn,
@@ -70,7 +153,7 @@ fun EnglishLevel2Screen(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-        }
+        } */
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             current.options.chunked(2).forEach { row ->
@@ -119,8 +202,12 @@ fun EnglishLevel2Screen(
 
         Spacer(Modifier.weight(1f))
 
-        OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
-            Text("Volver")
+        OutlinedButton(onClick = onBack, modifier = Modifier
+            .width(200.dp) .height(50.dp),
+            shape = RoundedCornerShape(25.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xD2AD2605))
+        ) {
+            Text("Volver", fontWeight = FontWeight.Bold, color = Color.White)
         }
     }
 

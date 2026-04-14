@@ -9,6 +9,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -41,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -113,7 +116,7 @@ fun ProfileScreen(
         ) {
             Spacer(modifier = Modifier.height(44.dp))
 
-            Box(
+            Box(        // I C O N  C I R C L E
                 modifier = Modifier
                     .offset(y = floatOffset.dp)
                     .size(164.dp)
@@ -136,6 +139,7 @@ fun ProfileScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .alpha(0.85f) // Transparencia de la card *
                     .shadow(14.dp, RoundedCornerShape(24.dp))
                     .clip(RoundedCornerShape(24.dp))
                     .background(Color.White.copy(alpha = 0.9f))
@@ -147,7 +151,7 @@ fun ProfileScreen(
                 ) {
                     Text(
                         text = profile.name.uppercase(),
-                        fontSize = 24.sp,
+                        fontSize = 30.sp, // 24.sp,         // ***
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFF23364E)
                     )
@@ -155,6 +159,7 @@ fun ProfileScreen(
                     Text(
                         text = "@${profile.username}",
                         fontSize = 15.sp,
+                        fontWeight = FontWeight.Black,          // *
                         color = Color(0xFF4F6278)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -166,7 +171,25 @@ fun ProfileScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(10.dp)) // 30.dp
+
+            Button(                         //====== L O G O U T ======
+                onClick = onLogout,
+                modifier = Modifier.padding(top = 16.dp) .width(160.dp), // Tamaño reducido
+                /*.fillMaxWidth()
+                .height(54.dp), */
+                shape = RoundedCornerShape(20.dp), // 22.dp
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFFE5E5),
+                    contentColor = Color(0xFFB3261E)
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+            ) {                                         // 16.sp
+                Text(text = "Cerrar sesión", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
 
             Text(
                 text = "Elige tu avatar",
@@ -204,7 +227,7 @@ fun ProfileScreen(
                             .background(
                                 brush = if (isSelected) {
                                     Brush.radialGradient(
-                                        listOf(Color(0xFFFFF176), Color(0xFFFFC107))
+                                        listOf(Color(0xB9FFF176), Color(0xFF8BC34A))
                                     )
                                 } else {
                                     Brush.radialGradient(
@@ -252,35 +275,28 @@ fun ProfileScreen(
                     .shadow(14.dp, RoundedCornerShape(26.dp)),
                 shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4A7CDB),
+                    containerColor = Color(0xFF81C784), // Azul kidu
                     contentColor = Color.White
                 )
             ) {
                 Text(
-                    text = "Guardar avatar",
-                    fontSize = 17.sp,
+                    text = "Guardar", // Guardar avatar
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            Button(
-                onClick = onLogout,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(22.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFFE5E5),
-                    contentColor = Color(0xFFB3261E)
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+          /*  Button(
+                onClick = onSaveAvatar, //  P E N D I E N T E *
+                modifier = Modifier.padding(top = 24.dp, bottom = 16.dp) .width(150.dp),
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(2.dp, Color.Red),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White) // Red *
             ) {
-                Text(text = "Cerrar sesión", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
+                Text("Volver", fontWeight = FontWeight.Bold)
+            } */
         }
     }
 }

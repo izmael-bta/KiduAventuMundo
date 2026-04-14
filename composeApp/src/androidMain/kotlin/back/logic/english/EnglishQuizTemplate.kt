@@ -1,19 +1,29 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -26,11 +36,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.ismael.kiduaventumundo.kiduaventumundo.R
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.EnglishManager
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.AnimatedCloud
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * Opcion generica para niveles tipo quiz.
@@ -114,12 +135,53 @@ fun EnglishQuizLevelScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+         horizontalAlignment = Alignment.CenterHorizontally  //verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Nivel $levelNumber: $levelTitle", style = MaterialTheme.typography.headlineSmall)
-        Text("* $starsLevel / $passStars", style = MaterialTheme.typography.titleMedium)
-        Text("Actividad ${index + 1} / ${questions.size}", style = MaterialTheme.typography.bodyMedium)
+        Spacer(modifier = Modifier.height(30.dp))
+        Text("Nivel: $levelNumber", fontSize = 18.sp, color = Color.White, fontFamily = FontFamily.SansSerif)
+        Text("$levelTitle", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = Color.White, textAlign = TextAlign.Center)
+        // --- SECCIÓN DE ESTRELLAS Y RETO ---
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            // ======= CÁPSULA DE ESTRELLAS =======
+            Surface(
+                shape = CircleShape, // Forma de cápsula
+                color = Color(0xFFFF9100) .copy(alpha = 0.4f), // Naranja translúcido
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f))
+            ) {
+                Text(
+                    text = "${starsLevel} / ${passStars} ⭐",
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                )
+            }
 
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // ======= CÁPSULA RETO =======
+            Surface(
+                shape = CircleShape, // Forma de cápsula
+                color = Color(0xFF039BE5).copy(alpha = 0.4f), // Azul translúcido
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f))
+            ) {
+                Text(
+                    text = "${index + 1} / ${totalActivities}",
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                )
+            }
+        }
+        //      ====== E R R O R E S ======
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
                 Text(
@@ -129,7 +191,7 @@ fun EnglishQuizLevelScreen(
                 Spacer(Modifier.height(6.dp))
                 Text(current.hint, style = MaterialTheme.typography.bodyMedium)
                 Spacer(Modifier.height(6.dp))
-                Text("Errores en esta actividad: $mistakes", style = MaterialTheme.typography.bodySmall)
+                Text("❌: $mistakes", style = MaterialTheme.typography.bodySmall) // Errores en esta actividad ============
             }
         }
 
@@ -174,7 +236,7 @@ fun EnglishQuizLevelScreen(
                                         }
                                     } else {
                                         mistakes++
-                                        feedback = "Intenta otra vez"
+                                        feedback = "Intenta de nuevo😅"
                                     }
                                 }
                         ) {
@@ -184,21 +246,27 @@ fun EnglishQuizLevelScreen(
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Text(opt.label, fontWeight = FontWeight.Bold)
+                                Spacer(Modifier.height(4.dp))           // P R U E B A  E S P A C I O * *
+                                //Text(opt.labelEn, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
                 }
             }
         }
-
+//                         ====== V O L V E R ======
         feedback?.let {
             Text(it, style = MaterialTheme.typography.titleMedium)
         }
 
         Spacer(Modifier.weight(1f))
 
-        OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
-            Text("Volver")
+        OutlinedButton(onClick = onBack, modifier = Modifier
+            .width(160.dp) .height(50.dp),
+            shape = RoundedCornerShape(25.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xD2AD2605))
+        ) {
+            Text("Volver", fontWeight = FontWeight.Bold, color = Color.White)
         }
     }
 

@@ -1,6 +1,8 @@
 package com.ismael.kiduaventumundo.kiduaventumundo.front.english
 
+import android.R.attr.duration
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,12 +26,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.ismael.kiduaventumundo.kiduaventumundo.R
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.ActivityStatus
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.english.EnglishActivitiesUseCase
+import com.ismael.kiduaventumundo.kiduaventumundo.ui.components.AnimatedCloud
 
 @Composable
 fun EnglishActivitiesScreen(
@@ -40,6 +45,22 @@ fun EnglishActivitiesScreen(
     onStartActivity: (Int) -> Unit
 ) {
     val activities = EnglishActivitiesUseCase.getActivities(level, totalActivities)
+    val cloudCount = 6
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Color(0xFF03E0F4), Color(0xFF02A7BD))))
+    )
+    Box(modifier = Modifier.fillMaxSize()){
+
+        AnimatedCloud(drawableRes = R.drawable.cloud,
+            startX = (-800..0).random().toFloat(),
+            yOffset = (50..300).random().toFloat(),
+            size = (100..200).random().toFloat(),
+            duration = (20000..40000).random()
+        ) }
 
     Column(
         modifier = Modifier
@@ -61,14 +82,14 @@ fun EnglishActivitiesScreen(
             items(activities) { activity ->
                 val isEnabled = activity.status != ActivityStatus.BLOCKED
                 val statusText = when (activity.status) {
-                    ActivityStatus.COMPLETED -> "Completada"
+                    ActivityStatus.COMPLETED -> "Completado"
                     ActivityStatus.AVAILABLE -> "Disponible"
-                    ActivityStatus.BLOCKED -> "Bloqueada"
+                    ActivityStatus.BLOCKED -> "Bloqueado"
                 }
                 val actionText = when (activity.status) {
-                    ActivityStatus.COMPLETED -> "Repetir"
-                    ActivityStatus.AVAILABLE -> "Jugar"
-                    ActivityStatus.BLOCKED -> "Candado"
+                    ActivityStatus.COMPLETED -> "✔"
+                    ActivityStatus.AVAILABLE -> "🏁"
+                    ActivityStatus.BLOCKED -> "🔒"
                 }
                 val starsText = activity.earnedStars?.let { " | $it estrellas" } ?: ""
 
@@ -123,7 +144,14 @@ fun EnglishActivitiesScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            OutlinedButton(
+            OutlinedButton(onClick = onBack, modifier = Modifier
+                .width(160.dp) .height(50.dp),
+                shape = RoundedCornerShape(25.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xD2AD2605))
+            ) {
+                Text("Volver", fontWeight = FontWeight.Bold, color = Color.White)
+            }
+            /*OutlinedButton(
                 onClick = onBack,
                 modifier = Modifier.width(200.dp),
                 border = BorderStroke(2.dp, Color.Red),
@@ -131,7 +159,7 @@ fun EnglishActivitiesScreen(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
             ) {
                 Text("Volver a niveles", fontWeight = FontWeight.Bold)
-            }
+            }*/
         }
     }
 }

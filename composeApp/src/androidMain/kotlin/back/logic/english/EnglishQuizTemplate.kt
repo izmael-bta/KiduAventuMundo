@@ -253,7 +253,6 @@ fun EnglishQuizLevelScreen(
             CompleteCard(
                 stars = activityStarsEarned,
                 totalPoints = starsLevel * 10,
-                title = "Actividad completada",
                 onContinue = {
                     showActivityResultDialog = false
                     val isLast = index == questions.lastIndex
@@ -282,13 +281,6 @@ fun EnglishQuizLevelScreen(
             CompleteCard(
                 stars = if (passed) 3 else 1,
                 totalPoints = starsLevel * 10,
-                title = if (passed) "Nivel completado" else "Casi",
-                message = if (passed) {
-                    "Ganaste $starsLevel estrellas. $unlockMessage"
-                } else {
-                    "Ganaste $starsLevel estrellas. Necesitas $passStars para pasar."
-                },
-                buttonText = if (passed) "Continuar" else "Reintentar",
                 onContinue = {
                     if (passed) {
                         val nextLevel = EnglishManager.completeLevelAndGetNext(

@@ -210,7 +210,6 @@ fun EnglishLevel2Screen(
             CompleteCard(
                 stars = state.value.activityStarsEarned,
                 totalPoints = state.value.starsLevel * 10,
-                title = "Actividad completada",
                 onContinue = {
                     state.value = session.continueAfterActivityResult()
                 }
@@ -228,13 +227,6 @@ fun EnglishLevel2Screen(
             CompleteCard(
                 stars = if (state.value.passed) 3 else 1,
                 totalPoints = state.value.starsLevel * 10,
-                title = if (state.value.passed) "Nivel completado" else "Casi",
-                message = if (state.value.passed) {
-                    "Terminaste la mision con ${state.value.starsLevel} estrellas."
-                } else {
-                    "Ganaste ${state.value.starsLevel} estrellas. Necesitas ${state.value.passStars} para pasar."
-                },
-                buttonText = if (state.value.passed) "Continuar" else "Reintentar",
                 onContinue = {
                     val action = session.confirmDialog()
                     state.value = session.state

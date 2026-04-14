@@ -45,22 +45,26 @@ fun EnglishActivitiesScreen(
     onStartActivity: (Int) -> Unit
 ) {
     val activities = EnglishActivitiesUseCase.getActivities(level, totalActivities)
-    val cloudCount = 6
+     val cloudCount = 6
 
     Box(
         modifier = Modifier.fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFF03E0F4), Color(0xFF02A7BD))))
+                    colors = listOf(Color(0xFF03E0F4), Color(0xFF02A7BD))
+                )
+            )
     )
-    Box(modifier = Modifier.fillMaxSize()){
+    repeat(cloudCount) { index ->       //  N U B E S * *
 
-        AnimatedCloud(drawableRes = R.drawable.cloud,
+        AnimatedCloud(
+            drawableRes = R.drawable.cloud,
             startX = (-800..0).random().toFloat(),
             yOffset = (50..300).random().toFloat(),
             size = (100..200).random().toFloat(),
             duration = (20000..40000).random()
-        ) }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -163,3 +167,4 @@ fun EnglishActivitiesScreen(
         }
     }
 }
+

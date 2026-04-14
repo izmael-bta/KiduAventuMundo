@@ -36,13 +36,15 @@ fun CompleteCard(
     totalPoints: Int,
     onContinue: () -> Unit
 ) {
-    val Card = Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(R.drawable.fondo_sunh),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+    Card {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(R.drawable.fondo_sunh),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
     // Fondo suave
     /*val cardBgGradient = Brush.verticalGradient(
@@ -147,7 +149,8 @@ fun CompleteCard(
         }
     }
 
-@Composable
+
+/*@Composable
 fun GifImageComponent() {
     val context = LocalContext.current
     val imageLoader = ImageLoader.Builder(context)
@@ -168,4 +171,4 @@ fun GifImageComponent() {
         contentDescription = "Celebración Final",
         modifier = Modifier.size(150.dp)
     )
-}
+}*/

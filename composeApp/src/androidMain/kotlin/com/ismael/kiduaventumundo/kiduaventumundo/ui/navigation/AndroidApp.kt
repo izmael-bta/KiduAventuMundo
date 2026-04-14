@@ -154,10 +154,12 @@ fun AndroidApp() {
             RegisterScreen(
 
                 onRegisterSuccess = {
-
-                    hasSession = true
-
-                    navController.navigate(Routes.MENU) {
+                    UserSession.clear()
+                    hasSession = false
+                    scope.launch {
+                        sessionRepository.clearSession()
+                    }
+                    navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.REGISTER) { inclusive = true }
                     }
 
@@ -199,6 +201,7 @@ fun AndroidApp() {
             ProgressScreen(
                 totalStars = progress.totalStars,
                 activitiesCompleted = progress.activitiesCompleted,
+                totalActivities = EnglishManager.getTotalActivitiesCount().coerceAtLeast(1),
                 currentLevel = progress.currentLevel,
                 unlockedLevels = progress.unlockedLevels,
                 onBack = { navController.popBackStack() },
@@ -239,12 +242,13 @@ fun AndroidApp() {
                 avatars = profileViewModel.avatars,
                 selectedAvatar = profileViewModel.selectedAvatar,
                 onAvatarSelected = { avatar -> profileViewModel.setAvatar(avatar) },
-                onSaveAvatar = {
+                onSaveAvatar = { avatar ->
                     scope.launch {
-                        val avatarId = "avatar_${profileViewModel.selectedAvatar.id}"
+                        val avatarId = "avatar_${avatar.id}"
                         val updated = userRepository.updateAvatar(sessionUser.id, avatarId)
                         if (updated) {
                             UserSession.setUser(sessionUser.copy(avatarId = avatarId))
+                            profileViewModel.setAvatar(avatar)
                         }
                         navController.popBackStack()
                     }

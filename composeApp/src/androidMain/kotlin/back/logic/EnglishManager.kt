@@ -25,6 +25,14 @@ import kotlinx.coroutines.launch
 object EnglishManager {
 
     val stars = mutableStateOf(0)
+    private val progressSummaryState = mutableStateOf(
+        ProgressSummary(
+            totalStars = 0,
+            activitiesCompleted = 0,
+            currentLevel = 1,
+            unlockedLevels = 1
+        )
+    )
     private val bestStarsByLevel = mutableMapOf<Int, Int>()
     private val activityBestStarsByLevel = mutableMapOf<Int, MutableList<Int?>>()
     private val nextStartActivityByLevel = mutableMapOf<Int, Int>()
@@ -82,6 +90,12 @@ object EnglishManager {
         val resolvedUserId = userId ?: return
         val summary = reportsRepository?.getSummary(resolvedUserId) ?: return
         stars.value = summary.totalStars
+        progressSummaryState.value = ProgressSummary(
+            totalStars = summary.totalStars,
+            activitiesCompleted = summary.activitiesCompleted,
+            currentLevel = summary.currentLevel,
+            unlockedLevels = summary.levelsUnlocked
+        )
     }
 
     suspend fun persistCurrentUserProgress() {
@@ -117,6 +131,7 @@ object EnglishManager {
         val delta = earned - maxOf(previous, 0)
         stars.value += delta
         activityStars[activityIndex] = earned
+        syncProgressSummaryFromMemory()
 
         ioScope.launch {
             runCatching {
@@ -180,6 +195,8 @@ object EnglishManager {
             nextUnlockedLevel = next.level
         }
 
+        syncProgressSummaryFromMemory()
+
         ioScope.launch {
             runCatching {
                 progressRepository?.upsertLevelProgress(
@@ -221,6 +238,14 @@ object EnglishManager {
     }
 
     fun getProgressSummary(): ProgressSummary {
+        return progressSummaryState.value
+    }
+
+    fun getTotalActivitiesCount(): Int {
+        return (1..8).sumOf { level -> totalActivitiesForLevel(level) }
+    }
+
+    private fun computeProgressSummaryFromMemory(): ProgressSummary {
         val currentLevels = getLevels()
         val currentLevel = currentLevels.firstOrNull { it.isUnlocked && !it.isCompleted }?.level
             ?: currentLevels.lastOrNull { it.isCompleted }?.level
@@ -237,6 +262,10 @@ object EnglishManager {
             currentLevel = currentLevel,
             unlockedLevels = unlockedLevels
         )
+    }
+
+    private fun syncProgressSummaryFromMemory() {
+        progressSummaryState.value = computeProgressSummaryFromMemory()
     }
 
     private fun totalActivitiesForLevel(level: Int): Int {
@@ -260,6 +289,7 @@ object EnglishManager {
         nextStartActivityByLevel.clear()
         levels.clear()
         levels.addAll(defaultLevels())
+        syncProgressSummaryFromMemory()
     }
 
     private suspend fun loadProgressFromApi() {
@@ -291,6 +321,17 @@ object EnglishManager {
                 }
             }
             activityBestStarsByLevel[level.level] = savedActivityStars
+        }
+
+        syncProgressSummaryFromMemory()
+
+        if (summary != null) {
+            progressSummaryState.value = progressSummaryState.value.copy(
+                totalStars = summary.totalStars,
+                activitiesCompleted = summary.activitiesCompleted,
+                currentLevel = summary.currentLevel,
+                unlockedLevels = summary.levelsUnlocked
+            )
         }
     }
 

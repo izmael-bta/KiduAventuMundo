@@ -55,6 +55,7 @@ import org.jetbrains.compose.resources.painterResource
 fun ProgressScreen(
     totalStars: Int,
     activitiesCompleted: Int,
+    totalActivities: Int,
     currentLevel: Int,
     unlockedLevels: Int,
     onBack: () -> Unit,
@@ -118,10 +119,10 @@ fun ProgressScreen(
                     verticalArrangement = Arrangement.spacedBy(20.dp) // 16
                 ) {
                     // Barras de progreso (Rosa, Naranja, Verde, Azul)
-                    AnimatedProgressBar("Estrellas Totales", totalStars.toString(), Color(0xFFF48FB1), totalStars / 100f)
-                    AnimatedProgressBar("Actividades", "$activitiesCompleted", Color(0xFFC165FA), activitiesCompleted / 10f)
-                    AnimatedProgressBar("Nivel Actual", currentLevel.toString(), Color(0xFF81C784), currentLevel / 8f)
-                    AnimatedProgressBar("Desbloqueados", unlockedLevels.toString(), Color(0xFF81D4FA), unlockedLevels / 8f)
+                    AnimatedProgressBar("Estrellas Totales", totalStars.toString(), Color(0xFFF48FB1), (totalStars / 100f).coerceIn(0f, 1f))
+                    AnimatedProgressBar("Actividades", "$activitiesCompleted", Color(0xFFC165FA), (activitiesCompleted / totalActivities.toFloat()).coerceIn(0f, 1f))
+                    AnimatedProgressBar("Nivel Actual", currentLevel.toString(), Color(0xFF81C784), (currentLevel / 8f).coerceIn(0f, 1f))
+                    AnimatedProgressBar("Desbloqueados", unlockedLevels.toString(), Color(0xFF81D4FA), (unlockedLevels / 8f).coerceIn(0f, 1f))
                 }
             }
             Spacer(modifier = Modifier.height(32.dp))
@@ -156,7 +157,7 @@ fun AnimatedProgressBar(
 
     // Define animacion de Float
     val progressAnimation by animateFloatAsState(
-        targetValue = if (startAnim) targetProgress else 0f,
+        targetValue = if (startAnim) targetProgress.coerceIn(0f, 1f) else 0f,
         animationSpec = tween(durationMillis = 1000) // 1 seg duracion
     )
     // Inicia animacion al cargar pantalla

@@ -209,7 +209,12 @@ fun EnglishLevel2Screen(
         ) {
             CompleteCard(
                 stars = state.value.activityStarsEarned,
-                totalPoints = state.value.starsLevel * 10,
+                summaryText = when (state.value.activityStarsEarned) {
+                    3 -> "Ganaste 3 estrellas en tu primer intento"
+                    2 -> "Ganaste 2 estrellas en tu segundo intento"
+                    1 -> "Ganaste 1 estrella en tu tercer intento"
+                    else -> "Desde el cuarto intento ya no ganas estrellas"
+                },
                 onContinue = {
                     state.value = session.continueAfterActivityResult()
                 }
@@ -226,7 +231,8 @@ fun EnglishLevel2Screen(
         ) {
             CompleteCard(
                 stars = if (state.value.passed) 3 else 1,
-                totalPoints = state.value.starsLevel * 10,
+                summaryText = "Estrellas acumuladas del nivel: ${state.value.starsLevel}",
+                warningText = if (state.value.passed) null else "Necesitas mas estrellas para desbloquear el siguiente nivel.",
                 onContinue = {
                     val action = session.confirmDialog()
                     state.value = session.state

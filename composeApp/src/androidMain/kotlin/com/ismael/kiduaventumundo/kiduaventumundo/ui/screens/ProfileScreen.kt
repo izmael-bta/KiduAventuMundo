@@ -66,7 +66,7 @@ fun ProfileScreen(
     avatars: List<Avatar>,
     selectedAvatar: Avatar,
     onAvatarSelected: (Avatar) -> Unit,
-    onSaveAvatar: () -> Unit,
+    onSaveAvatar: (Avatar) -> Unit,
     onLogout: () -> Unit
 ) {
     var tempSelectedAvatar by remember { mutableStateOf(selectedAvatar) }
@@ -267,7 +267,7 @@ fun ProfileScreen(
             Button(
                 onClick = {
                     onAvatarSelected(tempSelectedAvatar)
-                    onSaveAvatar()
+                    onSaveAvatar(tempSelectedAvatar)
                 },
                 modifier = Modifier
                     .fillMaxWidth()

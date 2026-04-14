@@ -9,6 +9,10 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+val backendBaseUrl = providers.gradleProperty("backendBaseUrl")
+    .orElse(providers.environmentVariable("BACKEND_BASE_URL"))
+    .orElse("http://192.168.0.7:8080")
+
 kotlin {
     androidTarget {
         compilerOptions {
@@ -60,12 +64,17 @@ android {
     namespace = "com.ismael.kiduaventumundo.kiduaventumundo"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.ismael.kiduaventumundo.kiduaventumundo"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+        buildConfigField("String", "BACKEND_BASE_URL", "\"${backendBaseUrl.get()}\"")
     }
     packaging {
         resources {

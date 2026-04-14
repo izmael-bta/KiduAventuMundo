@@ -116,14 +116,14 @@ fun SplashScreen(
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 44.sp
                             )
-                        ) { append("Kidu ") }
+                        ) { append("KiduAventu") }
                         withStyle(
                             style = SpanStyle(
                                 color = Color(0xFFE45A35),
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 44.sp
                             )
-                        ) { append("World") }
+                        ) { append("Mundo") }
                     }
                 )
 

@@ -24,7 +24,9 @@ import com.ismael.kiduaventumundo.kiduaventumundo.data.remote.model.User
 /*
     Repository que encapsula el acceso a la base de datos o API.
 */
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.SessionRepository
 import com.ismael.kiduaventumundo.kiduaventumundo.domain.repository.UserRepository
+import com.ismael.kiduaventumundo.kiduaventumundo.domain.session.UserSession
 
 import kotlinx.coroutines.launch
 
@@ -43,7 +45,8 @@ import kotlinx.coroutines.launch
 */
 
 class RegisterViewModel(
-    private val repository: UserRepository
+    private val repository: UserRepository,
+    private val sessionRepository: SessionRepository
 ) : ViewModel() {
 
 
@@ -128,10 +131,13 @@ class RegisterViewModel(
                     significa que el registro fue exitoso.
                 */
                 if (result != null) {
+                    UserSession.setUser(result)
+                    sessionRepository.setSessionUserId(result.id)
 
                     uiState = uiState.copy(
                         isLoading = false,
-                        success = true
+                        success = true,
+                        error = null
                     )
 
                 } else {

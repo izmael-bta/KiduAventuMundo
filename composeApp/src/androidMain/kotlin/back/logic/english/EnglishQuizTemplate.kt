@@ -203,7 +203,7 @@ fun EnglishQuizLevelScreen(
                                         )
                                         activityStars[index] = maxOf(activityStars[index] ?: -1, earned)
                                         starsLevel = activityStars.sumOf { it ?: 0 }
-                                        feedback = "+$earned *"
+                                        feedback = if (earned > 0) "+$earned estrellas" else "0 estrellas"
                                         activityStarsEarned = earned
                                         showActivityResultDialog = true
                                     } else {
@@ -252,7 +252,12 @@ fun EnglishQuizLevelScreen(
         ) {
             CompleteCard(
                 stars = activityStarsEarned,
-                totalPoints = starsLevel * 10,
+                summaryText = when (activityStarsEarned) {
+                    3 -> "Ganaste 3 estrellas en tu primer intento"
+                    2 -> "Ganaste 2 estrellas en tu segundo intento"
+                    1 -> "Ganaste 1 estrella en tu tercer intento"
+                    else -> "Desde el cuarto intento ya no ganas estrellas"
+                },
                 onContinue = {
                     showActivityResultDialog = false
                     val isLast = index == questions.lastIndex
@@ -280,7 +285,8 @@ fun EnglishQuizLevelScreen(
         ) {
             CompleteCard(
                 stars = if (passed) 3 else 1,
-                totalPoints = starsLevel * 10,
+                summaryText = "Estrellas acumuladas del nivel: $starsLevel",
+                warningText = if (passed) null else "Necesitas mas estrellas para desbloquear el siguiente nivel.",
                 onContinue = {
                     if (passed) {
                         val nextLevel = EnglishManager.completeLevelAndGetNext(

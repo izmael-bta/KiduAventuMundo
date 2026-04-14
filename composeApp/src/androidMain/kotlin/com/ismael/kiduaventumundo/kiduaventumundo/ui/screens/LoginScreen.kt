@@ -1,6 +1,5 @@
 ﻿package com.ismael.kiduaventumundo.kiduaventumundo.ui.screens
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,15 +30,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.ImageLoader
-import coil.compose.AsyncImage
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
 import com.ismael.kiduaventumundo.kiduaventumundo.R
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.LoginResult
 import com.ismael.kiduaventumundo.kiduaventumundo.back.logic.auth.LoginService
@@ -52,7 +47,6 @@ fun LoginScreen(
     onGoForgotPassword: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     var nickname by remember { mutableStateOf("") }
@@ -60,19 +54,9 @@ fun LoginScreen(
     var error by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
 
-    val imageLoader = ImageLoader.Builder(context)
-        .components {
-            if (Build.VERSION.SDK_INT >= 28) {
-                add(ImageDecoderDecoder.Factory())
-            } else {
-                add(GifDecoder.Factory())
-            }
-        }
-        .build()
-
     Box(modifier = Modifier.fillMaxSize()) {
-        AsyncImage(
-            model = R.drawable.fondo_registro,
+        androidx.compose.foundation.Image(
+            painter = painterResource(id = R.drawable.fondo_registro),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -88,14 +72,14 @@ fun LoginScreen(
                 )
         )
 
-        AsyncImage(
-            model = R.drawable.hello,
-            imageLoader = imageLoader,
+        androidx.compose.foundation.Image(
+            painter = painterResource(id = R.drawable.logo_login),
             contentDescription = "Buho saludando",
             modifier = Modifier
                 .size(230.dp)
                 .align(Alignment.TopCenter)
-                .padding(top = 32.dp)
+                .padding(top = 32.dp),
+            contentScale = ContentScale.Fit
         )
 
         Card(

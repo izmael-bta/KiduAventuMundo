@@ -93,7 +93,7 @@ class EnglishLevelSession(
         _state = _state.copy(
             locked = true,
             starsLevel = activityStars.sumOf { it ?: 0 },
-            feedback = "+$earned *",
+            feedback = if (earned > 0) "+$earned estrellas" else "0 estrellas",
             showActivityResultDialog = true,
             activityStarsEarned = earned
         )

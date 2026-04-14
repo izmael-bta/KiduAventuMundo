@@ -16,6 +16,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.isSuccess
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
@@ -48,8 +49,19 @@ class UserApi(private val apiClient: ApiClient) {
     }.getOrNull()
 
     suspend fun getUserById(userId: Long): User? = runCatching {
-        // TODO: confirmar ruta exacta para buscar usuario por id.
-        apiClient.httpClient.get("${apiClient.baseUrl}/users/id/$userId").body<User>()
+        val candidateUrls = listOf(
+            "${apiClient.baseUrl}/users/id/$userId",
+            "${apiClient.baseUrl}/users/$userId"
+        )
+
+        for (url in candidateUrls) {
+            val response = runCatching { apiClient.httpClient.get(url) }.getOrNull() ?: continue
+            if (response.status.isSuccess()) {
+                return@runCatching response.body<User>()
+            }
+        }
+
+        null
     }.getOrNull()
 
     suspend fun getUserByNickname(nickname: String): User? = runCatching {
@@ -80,19 +92,19 @@ class UserApi(private val apiClient: ApiClient) {
     }.getOrNull()
 
     suspend fun updateUserAvatar(userId: Long, avatarId: String): Boolean = runCatching {
-        apiClient.httpClient.put("${apiClient.baseUrl}/users/$userId/avatar") {
+        val response = apiClient.httpClient.put("${apiClient.baseUrl}/users/$userId/avatar") {
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             setBody(UpdateAvatarRequest(avatarId = avatarId))
         }
-        true
+        response.status.isSuccess()
     }.getOrDefault(false)
 
     suspend fun updateUserPassword(userId: Long, passwordHash: String): Boolean = runCatching {
-        apiClient.httpClient.put("${apiClient.baseUrl}/users/$userId/password") {
+        val response = apiClient.httpClient.put("${apiClient.baseUrl}/users/$userId/password") {
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             setBody(UpdatePasswordRequest(passwordHash = passwordHash))
         }
-        true
+        response.status.isSuccess()
     }.getOrDefault(false)
 
     private fun extractMessage(errorBody: String): String? {

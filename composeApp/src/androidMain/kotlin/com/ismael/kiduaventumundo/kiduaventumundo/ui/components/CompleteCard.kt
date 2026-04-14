@@ -39,7 +39,8 @@ import com.ismael.kiduaventumundo.kiduaventumundo.R
 @Composable
 fun CompleteCard(
     stars: Int,
-    totalPoints: Int,
+    summaryText: String,
+    warningText: String? = null,
     onContinue: () -> Unit
 ) {
     Box(
@@ -83,7 +84,7 @@ fun CompleteCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Puntos: $totalPoints",
+                    text = summaryText,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF006064)
@@ -98,9 +99,9 @@ fun CompleteCard(
                     }
                 }
 
-                if (stars < 2) {
+                if (warningText != null) {
                     Text(
-                        text = "Casi! Necesitas mas estrellas para el siguiente nivel.",
+                        text = warningText,
                         fontSize = 14.sp,
                         color = Color.Red,
                         textAlign = TextAlign.Center

@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -45,6 +46,25 @@ import com.ismael.kiduaventumundo.kiduaventumundo.ui.viewmodel.ProfileViewModel
 import front.models.UserProfileUi
 import kotlinx.coroutines.launch
 
+private fun NavHostController.navigateToEnglishActivitiesSafely(level: Int) {
+    val returnedToEnglishMenu = popBackStack(Routes.ENGLISH, inclusive = false)
+    navigate(Routes.englishActivities(level)) {
+        if (returnedToEnglishMenu) {
+            popUpTo(Routes.ENGLISH) { inclusive = false }
+        }
+        launchSingleTop = true
+    }
+}
+
+private fun NavHostController.navigateToEnglishMenuSafely() {
+    val returnedToEnglishMenu = popBackStack(Routes.ENGLISH, inclusive = false)
+    if (!returnedToEnglishMenu) {
+        navigate(Routes.ENGLISH) {
+            launchSingleTop = true
+        }
+    }
+}
+
 @Composable
 fun AndroidApp() {
     val navController = rememberNavController()
@@ -81,15 +101,9 @@ fun AndroidApp() {
 
     val onEnglishLevelFinished: (Int?) -> Unit = { nextLevel ->
         if (nextLevel != null) {
-            navController.navigate(Routes.englishActivities(nextLevel)) {
-                popUpTo(Routes.ENGLISH) { inclusive = false }
-                launchSingleTop = true
-            }
+            navController.navigateToEnglishActivitiesSafely(nextLevel)
         } else {
-            navController.navigate(Routes.ENGLISH) {
-                popUpTo(Routes.ENGLISH) { inclusive = false }
-                launchSingleTop = true
-            }
+            navController.navigateToEnglishMenuSafely()
         }
     }
 

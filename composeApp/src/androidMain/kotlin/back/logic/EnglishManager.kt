@@ -119,31 +119,33 @@ object EnglishManager {
         activityStars[activityIndex] = earned
 
         ioScope.launch {
-            progressRepository?.upsertActivityProgress(
-                userId = userId,
-                level = level,
-                activityIndex = activityIndex,
-                progress = UserActivityProgress(
+            runCatching {
+                progressRepository?.upsertActivityProgress(
                     userId = userId,
                     level = level,
                     activityIndex = activityIndex,
-                    stars = earned,
-                    attempts = 1,
-                    successes = 1,
-                    lastResult = true
+                    progress = UserActivityProgress(
+                        userId = userId,
+                        level = level,
+                        activityIndex = activityIndex,
+                        stars = earned,
+                        attempts = 1,
+                        successes = 1,
+                        lastResult = true
+                    )
                 )
-            )
-            eventsRepository?.createEvent(
-                userId = userId,
-                event = ProgressEvent(
+                eventsRepository?.createEvent(
                     userId = userId,
-                    level = level,
-                    activityIndex = activityIndex,
-                    eventType = "activity_completed",
-                    starsDelta = delta,
-                    payloadJson = "{\"stars\":$earned}"
+                    event = ProgressEvent(
+                        userId = userId,
+                        level = level,
+                        activityIndex = activityIndex,
+                        eventType = "activity_completed",
+                        starsDelta = delta,
+                        payloadJson = "{\"stars\":$earned}"
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -179,29 +181,31 @@ object EnglishManager {
         }
 
         ioScope.launch {
-            progressRepository?.upsertLevelProgress(
-                userId = userId,
-                level = level,
-                progress = UserLevelProgress(
-                    userId = userId,
-                    level = level,
-                    isUnlocked = true,
-                    isCompleted = true,
-                    bestStars = earned
-                )
-            )
-            nextUnlockedLevel?.let { nextLevel ->
+            runCatching {
                 progressRepository?.upsertLevelProgress(
                     userId = userId,
-                    level = nextLevel,
+                    level = level,
                     progress = UserLevelProgress(
                         userId = userId,
-                        level = nextLevel,
+                        level = level,
                         isUnlocked = true,
-                        isCompleted = false,
-                        bestStars = bestStarsByLevel[nextLevel] ?: 0
+                        isCompleted = true,
+                        bestStars = earned
                     )
                 )
+                nextUnlockedLevel?.let { nextLevel ->
+                    progressRepository?.upsertLevelProgress(
+                        userId = userId,
+                        level = nextLevel,
+                        progress = UserLevelProgress(
+                            userId = userId,
+                            level = nextLevel,
+                            isUnlocked = true,
+                            isCompleted = false,
+                            bestStars = bestStarsByLevel[nextLevel] ?: 0
+                        )
+                    )
+                }
             }
         }
     }

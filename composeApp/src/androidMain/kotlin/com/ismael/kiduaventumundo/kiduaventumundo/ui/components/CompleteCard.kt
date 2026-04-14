@@ -36,14 +36,14 @@ fun CompleteCard(
     totalPoints: Int,
     onContinue: () -> Unit
 ) {
-    /* val Card = Box(modifier = Modifier.fillMaxSize()) {
+    val Card = Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(R.drawable.fondo_sunh),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-    }*/
+    }
     // Fondo suave
     /*val cardBgGradient = Brush.verticalGradient(
         colors = listOf(Color(0xFFB2EBF2), Color(0xFFE0F2F1))
